@@ -1,14 +1,22 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
+import { Provider as JotaiProvider } from 'jotai'
+import { ThemeProvider } from '@mui/material/styles'
 import './index.css'
 import App from './App.tsx'
 import { queryClient } from './utils/queryClient.ts'
+import { store } from './store'
+import { muiTheme } from './theme/muiTheme.ts'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
-    <QueryClientProvider client={queryClient}>
-      <App />
-    </QueryClientProvider>
+    <JotaiProvider store={store}>
+      <QueryClientProvider client={queryClient}>
+        <ThemeProvider theme={muiTheme}>
+          <App />
+        </ThemeProvider>
+      </QueryClientProvider>
+    </JotaiProvider>
   </StrictMode>,
 )
