@@ -42,6 +42,19 @@ type ApiErrorBody = {
   errors?: unknown
 }
 
+/**
+ * Nem todo endpoint responde JSON: o /auth/login devolve o motivo da falha em
+ * text/plain ("Email ou senha inválidos"). Sem isto a UI mostraria o genérico
+ * "A requisição falhou com status 401" e perderia a mensagem real do backend.
+ */
+function readErrorBody(data: unknown): ApiErrorBody {
+  if (typeof data === 'string') {
+    const text = data.trim()
+    return text ? { message: text } : {}
+  }
+  return (data ?? {}) as ApiErrorBody
+}
+
 const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
 const TIMEOUT_MS = 30_000
 
@@ -83,7 +96,7 @@ function toApiError(error: unknown): ApiError {
     )
   }
 
-  const axiosError = error as AxiosError<ApiErrorBody>
+  const axiosError = error as AxiosError<ApiErrorBody | string>
   const response = axiosError.response
 
   // Requisição cancelada (React Query aborta ao desmontar ou refazer a query).
@@ -100,16 +113,10 @@ function toApiError(error: unknown): ApiError {
     )
   }
 
-  const body = response.data
-  const message =
-    body?.message ?? body?.error ?? `A requisição falhou com status ${response.status}.`
+  const body = readErrorBody(response.data)
+  const message = body.message ?? body.error ?? `A requisição falhou com status ${response.status}.`
 
-  return new ApiError(
-    message,
-    response.status,
-    body?.code ?? `HTTP_${response.status}`,
-    body?.errors,
-  )
+  return new ApiError(message, response.status, body.code ?? `HTTP_${response.status}`, body.errors)
 }
 
 http.interceptors.response.use(

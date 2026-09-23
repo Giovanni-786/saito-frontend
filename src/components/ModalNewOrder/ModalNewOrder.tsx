@@ -42,7 +42,7 @@ function ModalNewOrder() {
       slots={{ transition: SlideUpTransition }}
       aria-labelledby="modal-new-order-title"
     >
-      <AppBar sx={{ position: 'relative' }}>
+      <AppBar sx={{ position: 'relative' }} className="bg-deep-blue!">
         <Toolbar>
           <IconButton edge="start" color="inherit" onClick={close} aria-label="Fechar">
             <CloseIcon />

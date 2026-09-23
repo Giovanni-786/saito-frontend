@@ -3,8 +3,9 @@ import { createRoot } from 'react-dom/client'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { Provider as JotaiProvider } from 'jotai'
 import { ThemeProvider } from '@mui/material/styles'
+import { BrowserRouter } from 'react-router'
 import './index.css'
-import App from './App.tsx'
+import AppRoutes from './routes/AppRoutes.tsx'
 import { queryClient } from './utils/queryClient.ts'
 import { store } from './store'
 import { muiTheme } from './theme/muiTheme.ts'
@@ -14,7 +15,9 @@ createRoot(document.getElementById('root')!).render(
     <JotaiProvider store={store}>
       <QueryClientProvider client={queryClient}>
         <ThemeProvider theme={muiTheme}>
-          <App />
+          <BrowserRouter>
+            <AppRoutes />
+          </BrowserRouter>
         </ThemeProvider>
       </QueryClientProvider>
     </JotaiProvider>
