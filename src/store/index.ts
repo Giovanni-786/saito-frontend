@@ -11,4 +11,5 @@
  *   atomWithStorage('chave', inicial, undefined, { getOnInit: true })  -> persiste no localStorage
  */
 export { store } from './store'
+export * from './auth'
 export * from './newOrder'
