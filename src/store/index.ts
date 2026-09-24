@@ -13,3 +13,4 @@
 export { store } from './store'
 export * from './auth'
 export * from './newOrder'
+export * from './orderFilters'
