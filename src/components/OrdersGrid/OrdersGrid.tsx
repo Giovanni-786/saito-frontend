@@ -3,64 +3,13 @@ import { useAtomValue } from 'jotai'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import Alert from '@mui/material/Alert'
 import { DataGrid } from '@mui/x-data-grid'
-import type { GridColDef, GridPaginationModel, GridSortModel } from '@mui/x-data-grid'
+import type { GridPaginationModel, GridSortModel } from '@mui/x-data-grid'
 import { ptBR } from '@mui/x-data-grid/locales'
-import { listarAtendimentos } from '../../services/atendimentos'
-import type { Atendimento } from '../../services/atendimentos'
+import { serviceList } from '../../services/atendimentos'
 import { ordersSearchAtom } from '../../store'
 import { ApiError } from '../../utils/api'
-
-/** Itens por página. Fixo: o grid não oferece troca de tamanho. */
-const PAGE_SIZE = 10
-
-const ROW_HEIGHT = 52
-const HEADER_HEIGHT = 56
-const FOOTER_HEIGHT = 56
-
-/**
- * Altura fixa de exatamente uma página cheia. Assim o grid ocupa o mesmo
- * espaço durante o loading e com os dados, e a tela não pula quando eles chegam.
- */
-const GRID_HEIGHT = HEADER_HEIGHT + ROW_HEIGHT * PAGE_SIZE + FOOTER_HEIGHT
-
-const currencyFormatter = new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' })
-
-/**
- * "2026-09-22" -> "22/09/2026". Formatado a partir do texto, sem passar por
- * `new Date`, que interpretaria a data em UTC e poderia voltar um dia.
- */
-function formatDate(value: string) {
-  const [year, month, day] = value.split('-')
-  return `${day}/${month}/${year}`
-}
-
-const columns: GridColDef<Atendimento>[] = [
-  {
-    field: 'data',
-    headerName: 'Data',
-    width: 110,
-    valueFormatter: (value: string) => formatDate(value),
-  },
-  { field: 'cliente', headerName: 'Cliente', flex: 1, minWidth: 160 },
-  { field: 'veiculo', headerName: 'Veículo', flex: 1, minWidth: 140 },
-  { field: 'placa', headerName: 'Placa', width: 110 },
-  { field: 'telefone', headerName: 'Telefone', width: 140 },
-  {
-    field: 'km',
-    headerName: 'KM',
-    type: 'number',
-    width: 100,
-    valueFormatter: (value: number) => value.toLocaleString('pt-BR'),
-  },
-  {
-    field: 'valor',
-    headerName: 'Valor',
-    type: 'number',
-    width: 120,
-    valueFormatter: (value: number) => currencyFormatter.format(value),
-  },
-  { field: 'servicosPecas', headerName: 'Serviços / peças', flex: 1.5, minWidth: 200 },
-]
+import { columns } from './columns'
+import { GRID_HEIGHT, HEADER_HEIGHT, PAGE_SIZE, ROW_HEIGHT } from './constants'
 
 /**
  * Grid de atendimentos, 10 por página. A paginação é feita no backend: cada
@@ -104,7 +53,7 @@ function OrdersGrid() {
   const query = useQuery({
     queryKey: ['atendimentos', busca, sort, paginationModel],
     queryFn: ({ signal }) =>
-      listarAtendimentos(
+      serviceList(
         {
           // Sem busca/ordem o parâmetro nem vai na URL: o axios descarta `undefined`.
           busca: busca || undefined,

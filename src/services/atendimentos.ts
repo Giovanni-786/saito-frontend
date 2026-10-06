@@ -34,6 +34,6 @@ export type Page<T> = {
 }
 
 /** Lista os atendimentos com busca e paginação. Falhas chegam como ApiError. */
-export function listarAtendimentos(params: ListarAtendimentosParams, signal?: AbortSignal) {
+export function serviceList(params: ListarAtendimentosParams, signal?: AbortSignal) {
   return api.get<Page<Atendimento>>('/atendimentos', { params, signal })
 }
