@@ -1,13 +1,11 @@
-import Header from './components/Header/Header'
-import ModalNewOrder from './components/ModalNewOrder/ModalNewOrder'
+import Layout from './components/Layout/Layout'
+import Orders from './pages/Orders/Orders'
 
 function App() {
   return (
-    <div className="min-h-dvh">
-      <Header />
-      <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6"></main>
-      <ModalNewOrder />
-    </div>
+    <Layout>
+      <Orders />
+    </Layout>
   )
 }
 

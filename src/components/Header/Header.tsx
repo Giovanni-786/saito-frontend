@@ -3,7 +3,7 @@ import { openNewOrderModalAtom, signOutAtom } from '../../store'
 
 /**
  * Header global da aplicação: marca à esquerda, ação principal à direita.
- * Renderizado uma vez no App, acima de qualquer conteúdo de página.
+ * Renderizado uma vez no Layout, acima de qualquer conteúdo de página.
  */
 function Header() {
   const openNewOrder = useSetAtom(openNewOrderModalAtom)
