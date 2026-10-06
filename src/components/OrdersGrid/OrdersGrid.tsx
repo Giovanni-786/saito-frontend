@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useAtomValue } from 'jotai'
+import { useAtomValue, useSetAtom } from 'jotai'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import Alert from '@mui/material/Alert'
 import { DataGrid } from '@mui/x-data-grid'
 import type { GridPaginationModel, GridSortModel } from '@mui/x-data-grid'
 import { ptBR } from '@mui/x-data-grid/locales'
 import { serviceList } from '../../services/atendimentos'
-import { ordersSearchAtom } from '../../store'
+import { openEditOrderModalAtom, ordersSearchAtom } from '../../store'
 import { ApiError } from '../../utils/api'
 import { columns } from './columns'
 import { GRID_HEIGHT, HEADER_HEIGHT, PAGE_SIZE, ROW_HEIGHT } from './constants'
@@ -20,6 +20,7 @@ import { GRID_HEIGHT, HEADER_HEIGHT, PAGE_SIZE, ROW_HEIGHT } from './constants'
  */
 function OrdersGrid() {
   const busca = useAtomValue(ordersSearchAtom)
+  const openEdit = useSetAtom(openEditOrderModalAtom)
 
   const [paginationModel, setPaginationModel] = useState<GridPaginationModel>({
     page: 0,
@@ -102,6 +103,7 @@ function OrdersGrid() {
         slotProps={{
           loadingOverlay: { variant: 'skeleton', noRowsVariant: 'skeleton' },
         }}
+        onRowClick={({ row }) => openEdit(row.id)}
         disableRowSelectionOnClick
         disableColumnMenu
         localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
@@ -110,6 +112,8 @@ function OrdersGrid() {
           bgcolor: 'background.paper',
           // Com uma única opção de tamanho, o seletor "Linhas por página" não tem o que escolher.
           '& .MuiTablePagination-selectLabel, & .MuiTablePagination-input': { display: 'none' },
+          // A linha inteira abre a edição.
+          '& .MuiDataGrid-row': { cursor: 'pointer' },
         }}
       />
     </div>

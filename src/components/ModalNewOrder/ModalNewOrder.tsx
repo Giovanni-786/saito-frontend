@@ -8,7 +8,9 @@ import Typography from '@mui/material/Typography'
 import Slide from '@mui/material/Slide'
 import CloseIcon from '@mui/icons-material/Close'
 import type { TransitionProps } from '@mui/material/transitions'
-import { closeNewOrderModalAtom, newOrderModalAtom } from '../../store'
+import { closeOrderModalAtom, orderModalAtom } from '../../store'
+import EditOrderForm from './EditOrderForm'
+import NewOrderForm from './NewOrderForm'
 
 type TransitionSlotProps = TransitionProps & {
   children: ReactElement<unknown>
@@ -25,14 +27,14 @@ function SlideUpTransition(props: TransitionSlotProps) {
 }
 
 /**
- * Modal fullscreen de novo atendimento.
+ * Modal fullscreen de atendimento: cadastro ou edição, conforme o `orderId`.
  *
- * Não recebe props: lê o estado de abertura do `newOrderModalAtom`. Quem abre é
- * o Header; qualquer outro ponto do app pode abrir com `openNewOrderModalAtom`.
+ * Não recebe props: lê o estado do `orderModalAtom`. O Header abre para cadastro
+ * (`openNewOrderModalAtom`) e o grid abre para edição (`openEditOrderModalAtom`).
  */
 function ModalNewOrder() {
-  const open = useAtomValue(newOrderModalAtom)
-  const close = useSetAtom(closeNewOrderModalAtom)
+  const { open, orderId } = useAtomValue(orderModalAtom)
+  const close = useSetAtom(closeOrderModalAtom)
 
   return (
     <Dialog
@@ -53,13 +55,20 @@ function ModalNewOrder() {
             variant="h6"
             component="h2"
           >
-            Novo atendimento
+            {orderId === null ? 'Novo atendimento' : 'Editar atendimento'}
           </Typography>
         </Toolbar>
       </AppBar>
 
-      {/* Corpo ainda vazio — o formulário do atendimento entra aqui. */}
-      <div className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6"></div>
+      {/* Coluna flex + my-auto no form: centraliza quando cabe e rola quando não cabe. */}
+      <div className="flex flex-1 flex-col overflow-y-auto bg-surface-muted px-4 py-8 sm:px-6">
+        {orderId === null ? (
+          <NewOrderForm onClose={close} />
+        ) : (
+          // key: trocar de atendimento remonta o form com os dados do novo.
+          <EditOrderForm key={orderId} orderId={orderId} onClose={close} />
+        )}
+      </div>
     </Dialog>
   )
 }
