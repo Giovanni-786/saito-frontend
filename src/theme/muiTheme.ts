@@ -16,6 +16,11 @@ export const muiTheme = createTheme({
       light: '#eaf1fd', // light-blue
       contrastText: '#ffffff',
     },
+    error: {
+      main: '#c62828', // danger
+      light: '#fdecec', // danger-light
+      contrastText: '#ffffff',
+    },
     text: {
       primary: '#14171a', // black
       secondary: '#5a6472',

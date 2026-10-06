@@ -13,6 +13,8 @@
   --color-saito-blue: #1d4ed8;
   --color-deep-blue: #0f2a54;
   --color-light-blue: #eaf1fd;
+  --color-danger: #c62828;
+  --color-danger-light: #fdecec;
 
   /* Cores semânticas: use bg-surface, text-content, border-line nos componentes.
      Assim um ajuste de fundo ou de texto acontece num lugar só. */

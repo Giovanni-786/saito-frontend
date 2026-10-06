@@ -1,6 +1,6 @@
 /**
  * Ponto único de importação do estado global:
- *   import { store, newOrderModalAtom } from './store'
+ *   import { store, orderModalAtom } from './store'
  *
  * Cada domínio de estado ganha seu próprio arquivo nesta pasta e é reexportado aqui.
  *
@@ -12,5 +12,6 @@
  */
 export { store } from './store'
 export * from './auth'
+export * from './deleteOrder'
 export * from './newOrder'
 export * from './orderFilters'

@@ -33,7 +33,30 @@ export type Page<T> = {
   size: number
 }
 
+/** Corpo de POST /atendimentos: o atendimento sem o `id`, que o backend gera. */
+export type NovoAtendimento = Omit<Atendimento, 'id'>
+
 /** Lista os atendimentos com busca e paginação. Falhas chegam como ApiError. */
 export function serviceList(params: ListarAtendimentosParams, signal?: AbortSignal) {
   return api.get<Page<Atendimento>>('/atendimentos', { params, signal })
+}
+
+/** Busca um atendimento pelo id. Falhas chegam como ApiError. */
+export function serviceGet(id: number, signal?: AbortSignal) {
+  return api.get<Atendimento>(`/atendimentos/${id}`, { signal })
+}
+
+/** Cadastra um atendimento e devolve o registro criado. Falhas chegam como ApiError. */
+export function serviceCreate(body: NovoAtendimento) {
+  return api.post<Atendimento, NovoAtendimento>('/atendimentos', body)
+}
+
+/** Exclui um atendimento. Falhas chegam como ApiError. */
+export function serviceDelete(id: number) {
+  return api.delete(`/atendimentos/${id}`)
+}
+
+/** Atualiza um atendimento e devolve o registro salvo. Falhas chegam como ApiError. */
+export function serviceUpdate(id: number, body: NovoAtendimento) {
+  return api.put<Atendimento, NovoAtendimento>(`/atendimentos/${id}`, body)
 }
