@@ -106,6 +106,7 @@ function OrdersGrid() {
         onRowClick={({ row }) => openEdit(row.id)}
         disableRowSelectionOnClick
         disableColumnMenu
+        disableColumnResize
         localeText={ptBR.components.MuiDataGrid.defaultProps.localeText}
         sx={{
           height: GRID_HEIGHT,
