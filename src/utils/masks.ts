@@ -32,6 +32,26 @@ export function normalizePlate(value: string) {
     .slice(0, 7)
 }
 
+/** "45122947830" -> "451.229.478-30". Formata conforme digita. */
+export function maskCpf(digits: string) {
+  return digits
+    .replace(/^(\d{3})(\d)/, '$1.$2')
+    .replace(/^(\d{3})\.(\d{3})(\d)/, '$1.$2.$3')
+    .replace(/\.(\d{3})(\d{1,2})$/, '.$1-$2')
+}
+
+/**
+ * Chassi (VIN): 17 letras e números, em maiúsculas. I, O e Q não existem em
+ * chassi justamente para não confundir com 1 e 0, então são descartadas.
+ */
+export function normalizeChassis(value: string) {
+  return value
+    .replace(/[^a-zA-Z0-9]/g, '')
+    .toUpperCase()
+    .replace(/[IOQ]/g, '')
+    .slice(0, 17)
+}
+
 /** "85000" -> "85.000". */
 export function maskInteger(digits: string) {
   return digits ? Number(digits).toLocaleString('pt-BR') : ''
