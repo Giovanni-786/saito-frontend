@@ -2,6 +2,8 @@ import type { ReactNode } from 'react'
 import DeleteOrderDialog from '../DeleteOrderDialog/DeleteOrderDialog'
 import Header from '../Header/Header'
 import ModalNewOrder from '../ModalNewOrder/ModalNewOrder'
+import ModalReport from '../ModalReport/ModalReport'
+import SignOutDialog from '../SignOutDialog/SignOutDialog'
 
 type LayoutProps = {
   children: ReactNode
@@ -9,7 +11,7 @@ type LayoutProps = {
 
 /**
  * Estrutura comum das telas autenticadas: header no topo, conteúdo centralizado
- * e as modais globais de atendimento (cadastro/edição e exclusão), abertas por
+ * e as modais globais (atendimento, laudo, exclusão e saída), abertas por
  * atoms a partir do Header e do grid.
  */
 function Layout({ children }: LayoutProps) {
@@ -20,7 +22,9 @@ function Layout({ children }: LayoutProps) {
         {children}
       </main>
       <ModalNewOrder />
+      <ModalReport />
       <DeleteOrderDialog />
+      <SignOutDialog />
     </div>
   )
 }

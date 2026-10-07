@@ -1,5 +1,5 @@
 import { useSetAtom } from 'jotai'
-import { openNewOrderModalAtom, signOutAtom } from '../../store'
+import { openNewOrderModalAtom, openReportModalAtom, openSignOutDialogAtom } from '../../store'
 
 /**
  * Header global da aplicação: marca à esquerda, ação principal à direita.
@@ -7,7 +7,8 @@ import { openNewOrderModalAtom, signOutAtom } from '../../store'
  */
 function Header() {
   const openNewOrder = useSetAtom(openNewOrderModalAtom)
-  const signOut = useSetAtom(signOutAtom)
+  const openReport = useSetAtom(openReportModalAtom)
+  const openSignOut = useSetAtom(openSignOutDialogAtom)
 
   return (
     <header className="bg-deep-blue">
@@ -27,10 +28,18 @@ function Header() {
             Novo atendimento
           </button>
 
-          {/* Encerrar a sessão limpa o token; o RequireAuth manda para o /login. */}
           <button
             type="button"
-            onClick={signOut}
+            onClick={openReport}
+            className="inline-flex shrink-0 items-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-saito-blue shadow-sm transition-colors hover:bg-light-blue focus-visible:outline-white"
+          >
+            Laudo
+          </button>
+
+          {/* Pede confirmação antes; quem encerra a sessão é o SignOutDialog. */}
+          <button
+            type="button"
+            onClick={openSignOut}
             className="inline-flex shrink-0 items-center rounded-lg px-3 py-2 text-sm font-medium text-white/80 transition-colors hover:bg-white/10 hover:text-white focus-visible:outline-white"
           >
             Sair
