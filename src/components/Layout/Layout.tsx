@@ -12,20 +12,20 @@ type LayoutProps = {
 }
 
 /**
- * Estrutura comum das telas autenticadas: header no topo, sidebar à esquerda,
- * conteúdo centralizado e as modais globais (atendimento, laudo, exclusão e
- * saída), abertas por atoms a partir do Header, da Sidebar e do grid.
+ * Estrutura comum das telas autenticadas: sidebar à esquerda (gaveta no
+ * mobile, com o Header para abri-la), conteúdo sobre o fundo `canvas` e as
+ * modais globais (atendimento, laudo, exclusão e saída), abertas por atoms.
  */
 function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
 
   return (
-    <div className="flex min-h-dvh flex-col">
-      <Header onMenuClick={() => setSidebarOpen(true)} />
-      <div className="flex flex-1">
-        <Sidebar mobileOpen={sidebarOpen} onMobileClose={() => setSidebarOpen(false)} />
-        {/* min-w-0: sem isso o DataGrid empurra a coluna e estoura a largura da tela. */}
-        <main className="mx-auto flex w-full max-w-7xl min-w-0 flex-col gap-4 px-4 py-8 sm:px-6">
+    <div className="flex min-h-dvh bg-canvas">
+      <Sidebar mobileOpen={sidebarOpen} onMobileClose={() => setSidebarOpen(false)} />
+      {/* min-w-0: sem isso o DataGrid empurra a coluna e estoura a largura da tela. */}
+      <div className="flex min-w-0 flex-1 flex-col">
+        <Header onMenuClick={() => setSidebarOpen(true)} />
+        <main className="mx-auto flex w-full max-w-310 min-w-0 flex-col gap-6 px-4 py-6 sm:px-6 md:py-8 lg:px-10">
           {children}
         </main>
       </div>

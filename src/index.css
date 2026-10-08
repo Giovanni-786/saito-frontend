@@ -3,9 +3,11 @@
 /* Design tokens do projeto. Tudo que entra aqui vira utilitário automaticamente:
    --color-saito-blue -> bg-saito-blue, text-saito-blue, border-saito-blue... */
 @theme {
+  /* Geist vem do Google Fonts (index.html); o resto é fallback enquanto carrega. */
   --font-sans:
-    ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+    'Geist', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-mono: 'Geist Mono', ui-monospace, 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
 
   /* Paleta da marca — cores globais do projeto. */
   --color-black: #14171a;
@@ -19,10 +21,17 @@
   /* Cores semânticas: use bg-surface, text-content, border-line nos componentes.
      Assim um ajuste de fundo ou de texto acontece num lugar só. */
   --color-surface: #ffffff;
+  /* Fundo da área de conteúdo: os cards brancos se destacam sobre ele. */
+  --color-canvas: #f5f7fa;
+  /* Cabeçalhos de tabela e rodapés de painel: um degrau acima do branco. */
+  --color-surface-subtle: #fafbfc;
   --color-surface-muted: var(--color-light-blue);
   --color-content: var(--color-black);
   --color-content-muted: #5a6472;
-  --color-line: var(--color-gray);
+  --color-content-subtle: #8a93a0;
+  /* Borda de cards e divisórias. O cinza da marca fica para bordas de input. */
+  --color-line: #e4e8ee;
+  --color-line-strong: var(--color-gray);
 }
 
 @layer base {

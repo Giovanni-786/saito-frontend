@@ -1,33 +1,55 @@
-import { useSetAtom } from 'jotai'
+import type { ReactNode } from 'react'
+import { useAtomValue, useSetAtom } from 'jotai'
+import { NavLink } from 'react-router'
 import Drawer from '@mui/material/Drawer'
-import Divider from '@mui/material/Divider'
-import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
-import ListItemButton from '@mui/material/ListItemButton'
-import ListItemIcon from '@mui/material/ListItemIcon'
-import ListItemText from '@mui/material/ListItemText'
+import IconButton from '@mui/material/IconButton'
+import Tooltip from '@mui/material/Tooltip'
+import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { openReportModalAtom, openSignOutDialogAtom } from '../../store'
+import { openReportModalAtom, openSignOutDialogAtom, userEmailAtom } from '../../store'
+import Brand from '../Brand/Brand'
 
-const DRAWER_WIDTH = 240
+export const SIDEBAR_WIDTH = 248
 
 type SidebarProps = {
-  /** Drawer do mobile aberto? No desktop a sidebar fica sempre visível. */
+  /** Gaveta do mobile aberta? No desktop a sidebar fica sempre visível. */
   mobileOpen: boolean
   onMobileClose: () => void
 }
 
+const navItemClass =
+  'flex h-11 w-full items-center gap-3 rounded-[10px] px-3 text-left text-sm font-medium transition-colors'
+const navIdleClass = 'text-content-muted hover:bg-canvas hover:text-content'
+const navActiveClass = 'bg-light-blue text-saito-blue'
+
+type NavButtonProps = {
+  icon: ReactNode
+  label: string
+  onClick: () => void
+}
+
+/** Item que abre uma modal (Laudo): visual de link, comportamento de botão. */
+function NavButton({ icon, label, onClick }: NavButtonProps) {
+  return (
+    <button type="button" onClick={onClick} className={`${navItemClass} ${navIdleClass}`}>
+      {icon}
+      {label}
+    </button>
+  )
+}
+
 /**
- * Menu lateral global. Desktop (md+): fixo à esquerda, abaixo do Header.
- * Mobile: gaveta temporária aberta pelo botão de menu do Header.
+ * Menu lateral global. Desktop (md+): coluna fixa à esquerda, com a marca no
+ * topo e o usuário no rodapé. Mobile: gaveta aberta pelo botão do Header.
  *
- * Os itens só abrem as modais globais via atoms; quem faz o trabalho são o
- * ModalReport e o SignOutDialog.
+ * "Laudo" e "Sair" só abrem as modais globais via atoms; quem faz o trabalho
+ * são o ModalReport e o SignOutDialog.
  */
 function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const openReport = useSetAtom(openReportModalAtom)
   const openSignOut = useSetAtom(openSignOutDialogAtom)
+  const email = useAtomValue(userEmailAtom)
 
   /** No mobile a gaveta fecha antes de abrir a modal, para não ficar por trás dela. */
   function select(action: () => void) {
@@ -36,44 +58,60 @@ function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   }
 
   const content = (
-    <nav aria-label="Menu principal" className="flex h-full flex-col">
-      {/* No mobile a gaveta cobre o Header, então repete a marca no topo. */}
-      <div className="flex h-16 items-center bg-deep-blue px-4 md:hidden">
-        <span className="text-lg font-semibold tracking-tight text-white">Saito Oficina</span>
+    <div className="flex h-full flex-col gap-6 bg-surface px-4 py-5">
+      <div className="px-2">
+        <Brand withSubtitle />
       </div>
 
-      <List sx={{ py: 2 }}>
-        <ListItem disablePadding>
-          <ListItemButton onClick={() => select(openReport)}>
-            <ListItemIcon sx={{ color: 'primary.main', minWidth: 40 }}>
-              <DescriptionOutlinedIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary="Laudo"
-              slotProps={{ primary: { sx: { fontWeight: 500, color: 'primary.dark' } } }}
-            />
-          </ListItemButton>
-        </ListItem>
-      </List>
+      <nav aria-label="Menu principal" className="flex flex-col gap-1">
+        <span className="px-3 pb-1.5 text-[11px] font-semibold tracking-[0.08em] text-content-subtle uppercase">
+          Menu
+        </span>
+        <NavLink
+          to="/"
+          end
+          onClick={onMobileClose}
+          className={({ isActive }) =>
+            `${navItemClass} ${isActive ? navActiveClass : navIdleClass}`
+          }
+        >
+          <AssignmentOutlinedIcon sx={{ fontSize: 20 }} aria-hidden="true" />
+          Atendimentos
+        </NavLink>
+        <NavButton
+          icon={<DescriptionOutlinedIcon sx={{ fontSize: 20 }} aria-hidden="true" />}
+          label="Laudo"
+          onClick={() => select(openReport)}
+        />
+      </nav>
 
-      {/* Sair fica no rodapé, longe das ações do dia a dia. */}
-      <div className="mt-auto">
-        <Divider />
-        <List sx={{ py: 1 }}>
-          <ListItem disablePadding>
-            <ListItemButton onClick={() => select(openSignOut)}>
-              <ListItemIcon sx={{ color: 'text.secondary', minWidth: 40 }}>
-                <LogoutIcon />
-              </ListItemIcon>
-              <ListItemText
-                primary="Sair"
-                slotProps={{ primary: { sx: { fontWeight: 500, color: 'text.secondary' } } }}
-              />
-            </ListItemButton>
-          </ListItem>
-        </List>
+      {/* Usuário e Sair no rodapé, longe das ações do dia a dia. */}
+      <div className="mt-auto flex items-center gap-3 rounded-xl border border-line p-3">
+        <div
+          aria-hidden="true"
+          className="flex size-9 shrink-0 items-center justify-center rounded-full bg-light-blue text-sm font-semibold text-saito-blue uppercase"
+        >
+          {(email ?? 'U').charAt(0)}
+        </div>
+        <div className="flex min-w-0 flex-1 flex-col leading-tight">
+          <span className="truncate text-[13px] font-semibold">{email ?? 'Usuário'}</span>
+          <span className="text-xs text-content-muted">Conectado</span>
+        </div>
+        <Tooltip title="Sair">
+          <IconButton
+            onClick={() => select(openSignOut)}
+            aria-label="Sair"
+            size="small"
+            sx={{
+              color: 'text.secondary',
+              '&:hover': { color: 'primary.main', bgcolor: 'primary.light' },
+            }}
+          >
+            <LogoutIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </div>
-    </nav>
+    </div>
   )
 
   return (
@@ -84,25 +122,19 @@ function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
         onClose={onMobileClose}
         sx={{
           display: { xs: 'block', md: 'none' },
-          '& .MuiDrawer-paper': { width: DRAWER_WIDTH },
+          '& .MuiDrawer-paper': { width: SIDEBAR_WIDTH, borderRight: 0 },
         }}
       >
         {content}
       </Drawer>
 
-      <Drawer
-        variant="permanent"
-        sx={{
-          display: { xs: 'none', md: 'block' },
-          width: DRAWER_WIDTH,
-          flexShrink: 0,
-          // Por padrão o paper é `fixed` e cobriria o Header; relativo, ele entra
-          // no fluxo do Layout e ocupa só a coluna abaixo do Header.
-          '& .MuiDrawer-paper': { width: DRAWER_WIDTH, position: 'relative' },
-        }}
+      {/* Desktop: sticky na altura da tela, para Sair continuar à mão ao rolar a lista. */}
+      <aside
+        className="sticky top-0 hidden h-dvh shrink-0 border-r border-line md:block"
+        style={{ width: SIDEBAR_WIDTH }}
       >
         {content}
-      </Drawer>
+      </aside>
     </>
   )
 }

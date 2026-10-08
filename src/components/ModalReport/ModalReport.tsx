@@ -1,12 +1,9 @@
 import type { ReactElement, Ref } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import Dialog from '@mui/material/Dialog'
-import AppBar from '@mui/material/AppBar'
-import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
 import Slide from '@mui/material/Slide'
-import CloseIcon from '@mui/icons-material/Close'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import type { TransitionProps } from '@mui/material/transitions'
 import { reportModalAtom, closeReportModalAtom } from '../../store'
 import ReportForm from './ReportForm'
@@ -16,14 +13,21 @@ type TransitionSlotProps = TransitionProps & {
   ref?: Ref<unknown>
 }
 
-/** Entrada deslizando de baixo para cima, igual à modal de atendimento. */
+/**
+ * Entrada deslizando de baixo para cima.
+ * No React 19 a `ref` chega como prop comum, então não precisa do `forwardRef`
+ * que aparece no exemplo da documentação do MUI.
+ */
 function SlideUpTransition(props: TransitionSlotProps) {
   return <Slide direction="up" {...props} />
 }
 
 /**
- * Modal fullscreen de laudo. Não recebe props: lê o estado do
- * `reportModalAtom`. Quem abre é o Header (`openReportModalAtom`).
+ * Modal fullscreen de laudo: barra branca no topo, formulário com
+ * pré-visualização ao lado e ações num rodapé fixo (ReportForm).
+ *
+ * Não recebe props: lê o estado do `reportModalAtom`. Quem abre é a Sidebar
+ * (`openReportModalAtom`).
  */
 function ModalReport() {
   const open = useAtomValue(reportModalAtom)
@@ -35,23 +39,24 @@ function ModalReport() {
       open={open}
       onClose={close}
       slots={{ transition: SlideUpTransition }}
+      slotProps={{ paper: { sx: { borderRadius: 0 } } }}
       aria-labelledby="modal-report-title"
     >
-      <AppBar sx={{ position: 'relative' }} className="bg-deep-blue!">
-        <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={close} aria-label="Fechar">
-            <CloseIcon />
-          </IconButton>
-          <Typography id="modal-report-title" sx={{ ml: 2, flex: 1 }} variant="h6" component="h2">
-            Laudo
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      <header className="flex items-center gap-3 border-b border-line bg-surface px-3 py-3 sm:px-6 lg:px-8">
+        <IconButton onClick={close} aria-label="Fechar" sx={{ color: 'text.secondary' }}>
+          <CloseRoundedIcon />
+        </IconButton>
+        <div className="flex min-w-0 flex-col leading-tight">
+          <h2 id="modal-report-title" className="text-[17px] font-semibold tracking-tight">
+            Novo laudo
+          </h2>
+          <p className="truncate text-[13px] text-content-muted">
+            Preencha os dados e confira a pré-visualização antes de gerar o PDF.
+          </p>
+        </div>
+      </header>
 
-      {/* Coluna flex + my-auto no form: centraliza quando cabe e rola quando não cabe. */}
-      <div className="flex flex-1 flex-col overflow-y-auto bg-surface-muted px-4 py-8 sm:px-6">
-        <ReportForm onClose={close} />
-      </div>
+      <ReportForm onClose={close} />
     </Dialog>
   )
 }

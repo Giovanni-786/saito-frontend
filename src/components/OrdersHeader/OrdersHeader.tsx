@@ -1,12 +1,31 @@
-import OrdersFilters from '../OrdersFilters/OrdersFilters'
+import { useSetAtom } from 'jotai'
+import Button from '@mui/material/Button'
+import AddRoundedIcon from '@mui/icons-material/AddRounded'
+import { openNewOrderModalAtom } from '../../store'
 
-/** Título da listagem de atendimentos com os filtros ao lado. */
+/** Cabeçalho da tela de atendimentos: título, descrição e a ação principal. */
 function OrdersHeader() {
+  const openNewOrder = useSetAtom(openNewOrderModalAtom)
+
   return (
-    <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-      <h2 className="text-xl font-semibold tracking-tight text-deep-blue">Atendimentos</h2>
-      <OrdersFilters />
-    </div>
+    <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+      <div className="flex flex-col gap-1.5">
+        <h1 className="text-2xl font-semibold tracking-tight sm:text-[28px]">Atendimentos</h1>
+        <p className="text-sm text-content-muted">
+          Serviços realizados na oficina. Clique em um atendimento para editar.
+        </p>
+      </div>
+
+      <Button
+        variant="contained"
+        size="large"
+        onClick={openNewOrder}
+        startIcon={<AddRoundedIcon />}
+        sx={{ flexShrink: 0, alignSelf: { xs: 'stretch', sm: 'auto' } }}
+      >
+        Novo atendimento
+      </Button>
+    </header>
   )
 }
 

@@ -2,7 +2,7 @@ import type { MouseEvent } from 'react'
 import { useSetAtom } from 'jotai'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import DeleteIcon from '@mui/icons-material/Delete'
+import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlineRounded'
 import type { Atendimento } from '../../services/atendimentos'
 import { openDeleteOrderDialogAtom } from '../../store'
 
@@ -22,8 +22,13 @@ function DeleteOrderButton({ order }: DeleteOrderButtonProps) {
 
   return (
     <Tooltip title="Excluir">
-      <IconButton size="small" color="error" onClick={handleClick} aria-label="Excluir atendimento">
-        <DeleteIcon fontSize="small" />
+      <IconButton
+        size="small"
+        onClick={handleClick}
+        aria-label="Excluir atendimento"
+        sx={{ color: 'text.secondary', '&:hover': { color: 'error.main', bgcolor: 'error.light' } }}
+      >
+        <DeleteOutlineIcon fontSize="small" />
       </IconButton>
     </Tooltip>
   )

@@ -2,7 +2,7 @@ import type { MouseEvent } from 'react'
 import { useSetAtom } from 'jotai'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
-import EditIcon from '@mui/icons-material/Edit'
+import EditOutlinedIcon from '@mui/icons-material/EditOutlined'
 import { openEditOrderModalAtom } from '../../store'
 
 type EditOrderButtonProps = {
@@ -24,8 +24,16 @@ function EditOrderButton({ orderId }: EditOrderButtonProps) {
 
   return (
     <Tooltip title="Editar">
-      <IconButton size="small" onClick={handleClick} aria-label="Editar atendimento">
-        <EditIcon fontSize="small" />
+      <IconButton
+        size="small"
+        onClick={handleClick}
+        aria-label="Editar atendimento"
+        sx={{
+          color: 'text.secondary',
+          '&:hover': { color: 'primary.main', bgcolor: 'primary.light' },
+        }}
+      >
+        <EditOutlinedIcon fontSize="small" />
       </IconButton>
     </Tooltip>
   )
