@@ -60,3 +60,20 @@ export function serviceDelete(id: number) {
 export function serviceUpdate(id: number, body: NovoAtendimento) {
   return api.put<Atendimento, NovoAtendimento>(`/atendimentos/${id}`, body)
 }
+
+/**
+ * Resposta de GET /atendimentos/resumo.
+ *
+ * A rota ainda não existe no backend: nome e campos são uma proposta. Quando
+ * ela for criada, ajuste aqui conforme o DTO real e ligue o
+ * SUMMARY_ENDPOINT_READY no OrdersSummary.
+ */
+export type ResumoAtendimentos = {
+  totalAtendimentos: number
+  faturamentoTotal: number
+}
+
+/** Totais de atendimentos e faturamento. Falhas chegam como ApiError. */
+export function serviceSummary(signal?: AbortSignal) {
+  return api.get<ResumoAtendimentos>('/atendimentos/resumo', { signal })
+}

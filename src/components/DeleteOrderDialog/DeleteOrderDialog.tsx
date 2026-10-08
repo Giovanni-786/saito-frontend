@@ -59,11 +59,7 @@ function DeleteOrderDialog() {
           <WarningAmberRoundedIcon className="text-danger" sx={{ fontSize: 36 }} />
         </div>
 
-        <DialogTitle
-          id="delete-order-title"
-          className="p-0! text-deep-blue"
-          sx={{ fontWeight: 600 }}
-        >
+        <DialogTitle id="delete-order-title" className="p-0! text-content" sx={{ fontWeight: 600 }}>
           Excluir atendimento?
         </DialogTitle>
 
@@ -83,7 +79,7 @@ function DeleteOrderDialog() {
           onClick={handleClose}
           disabled={pending}
           fullWidth
-          sx={{ textTransform: 'none', fontWeight: 600, m: '0 !important' }}
+          sx={{ m: '0 !important' }}
         >
           Cancelar
         </Button>
@@ -95,7 +91,7 @@ function DeleteOrderDialog() {
           disabled={pending || !order}
           fullWidth
           startIcon={pending ? <CircularProgress size={18} color="inherit" /> : undefined}
-          sx={{ textTransform: 'none', fontWeight: 600, m: '0 !important' }}
+          sx={{ m: '0 !important' }}
         >
           {pending ? 'Excluindo...' : 'Excluir'}
         </Button>

@@ -25,7 +25,11 @@ function EditOrderForm({ orderId, onClose }: EditOrderFormProps) {
 
   if (query.isPending) {
     return (
-      <div className="m-auto" role="status" aria-label="Carregando atendimento">
+      <div
+        className="flex flex-1 items-center justify-center"
+        role="status"
+        aria-label="Carregando atendimento"
+      >
         <CircularProgress />
       </div>
     )
@@ -33,18 +37,19 @@ function EditOrderForm({ orderId, onClose }: EditOrderFormProps) {
 
   if (query.isError) {
     return (
-      <Alert
-        severity="error"
-        role="alert"
-        className="m-auto w-full max-w-3xl"
-        action={
-          <Button color="inherit" size="small" onClick={() => void query.refetch()}>
-            Tentar novamente
-          </Button>
-        }
-      >
-        Não foi possível carregar o atendimento.
-      </Alert>
+      <div className="p-5 sm:p-6">
+        <Alert
+          severity="error"
+          role="alert"
+          action={
+            <Button color="inherit" size="small" onClick={() => void query.refetch()}>
+              Tentar novamente
+            </Button>
+          }
+        >
+          Não foi possível carregar o atendimento.
+        </Alert>
+      </div>
     )
   }
 

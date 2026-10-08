@@ -22,7 +22,7 @@ type NewOrderFormProps = {
  * Formulário de atendimento: cadastra (POST /atendimentos) ou, recebendo
  * `order`, edita (PUT /atendimentos/{id}) com os campos já preenchidos.
  *
- * O estado vive aqui dentro: o Dialog desmonta o conteúdo ao fechar, então
+ * O estado vive aqui dentro: o Drawer desmonta o conteúdo ao fechar, então
  * cada abertura começa com o formulário limpo, sem reset manual.
  */
 function NewOrderForm({ order, onClose }: NewOrderFormProps) {
@@ -72,16 +72,9 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
 
   return (
     // noValidate: quem valida e escreve as mensagens é o app, não o navegador.
-    <form
-      onSubmit={handleSubmit}
-      noValidate
-      className="mx-auto my-auto w-full max-w-3xl rounded-2xl border border-line bg-surface p-6 shadow-sm sm:p-8"
-    >
-      <p className="mb-6 text-sm text-content-muted">
-        Preencha os dados do atendimento. Campos com * são obrigatórios.
-      </p>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-6">
+    // Corpo rola e o rodapé com as ações fica fixo embaixo do painel.
+    <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
+      <div className="grid flex-1 grid-cols-1 content-start gap-4 overflow-y-auto px-5 py-6 sm:grid-cols-6 sm:px-6">
         <TextField
           label="Data"
           type="date"
@@ -92,7 +85,7 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           required
           disabled={disabled}
           slotProps={{ inputLabel: { shrink: true } }}
-          className="md:col-span-2"
+          className="sm:col-span-2"
         />
 
         <TextField
@@ -105,7 +98,7 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           autoFocus
           required
           disabled={disabled}
-          className="md:col-span-4"
+          className="sm:col-span-4"
         />
 
         <TextField
@@ -118,7 +111,7 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           required
           disabled={disabled}
           slotProps={{ htmlInput: { inputMode: 'tel' } }}
-          className="md:col-span-2"
+          className="sm:col-span-2"
         />
 
         <TextField
@@ -130,7 +123,7 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           placeholder="Honda Civic"
           required
           disabled={disabled}
-          className="md:col-span-2"
+          className="sm:col-span-4"
         />
 
         <TextField
@@ -143,7 +136,7 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           required
           disabled={disabled}
           slotProps={{ htmlInput: { autoCapitalize: 'characters' } }}
-          className="md:col-span-2"
+          className="sm:col-span-2"
         />
 
         <TextField
@@ -156,7 +149,7 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           required
           disabled={disabled}
           slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-          className="md:col-span-3"
+          className="sm:col-span-2"
         />
 
         <TextField
@@ -172,7 +165,7 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           required
           disabled={disabled}
           slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-          className="md:col-span-3"
+          className="sm:col-span-2"
         />
 
         <TextField
@@ -186,7 +179,7 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           multiline
           minRows={3}
           disabled={disabled}
-          className="sm:col-span-2 md:col-span-6"
+          className="sm:col-span-6"
         />
 
         <TextField
@@ -196,18 +189,12 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           multiline
           minRows={2}
           disabled={disabled}
-          className="sm:col-span-2 md:col-span-6"
+          className="sm:col-span-6"
         />
       </div>
 
-      <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <Button
-          variant="outlined"
-          size="large"
-          onClick={onClose}
-          disabled={disabled}
-          sx={{ textTransform: 'none', fontWeight: 600 }}
-        >
+      <div className="flex flex-col-reverse gap-3 border-t border-line bg-surface-subtle px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+        <Button variant="outlined" size="large" onClick={onClose} disabled={disabled}>
           Cancelar
         </Button>
 
@@ -217,9 +204,8 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           size="large"
           disabled={disabled}
           startIcon={disabled ? <CircularProgress size={18} color="inherit" /> : undefined}
-          sx={{ textTransform: 'none', fontWeight: 600 }}
         >
-          {disabled ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Salvar atendimento'}
+          {disabled ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Cadastrar atendimento'}
         </Button>
       </div>
     </form>

@@ -1,48 +1,23 @@
-import { useSetAtom } from 'jotai'
 import IconButton from '@mui/material/IconButton'
 import MenuIcon from '@mui/icons-material/Menu'
-import { openNewOrderModalAtom } from '../../store'
+import Brand from '../Brand/Brand'
 
 type HeaderProps = {
-  /** Abre a Sidebar no mobile. No desktop ela já fica visível e o botão some. */
+  /** Abre a Sidebar em gaveta. */
   onMenuClick: () => void
 }
 
 /**
- * Header global da aplicação: marca à esquerda, ação principal à direita.
- * Renderizado uma vez no Layout, acima de qualquer conteúdo de página.
- * Laudo e Sair ficam na Sidebar.
+ * Barra superior só do mobile: botão do menu e a marca. No desktop a marca
+ * fica no topo da Sidebar e as ações de cada tela, no cabeçalho da página.
  */
 function Header({ onMenuClick }: HeaderProps) {
-  const openNewOrder = useSetAtom(openNewOrderModalAtom)
-
   return (
-    <header className="bg-deep-blue">
-      <div className="flex h-16 w-full items-center justify-between gap-4 px-4 sm:px-6">
-        <div className="flex items-center gap-2">
-          <IconButton
-            edge="start"
-            onClick={onMenuClick}
-            aria-label="Abrir menu"
-            sx={{ color: 'common.white', display: { md: 'none' } }}
-          >
-            <MenuIcon />
-          </IconButton>
-          <span className="text-lg font-semibold tracking-tight text-white">Saito Oficina</span>
-        </div>
-
-        <button
-          type="button"
-          onClick={openNewOrder}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-saito-blue shadow-sm transition-colors hover:bg-light-blue focus-visible:outline-white"
-        >
-          {/* O "+" é decorativo: o texto do botão já diz a ação para leitores de tela. */}
-          <span aria-hidden="true" className="text-base leading-none">
-            +
-          </span>
-          Novo atendimento
-        </button>
-      </div>
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-2 border-b border-line bg-surface/95 px-2 backdrop-blur md:hidden">
+      <IconButton onClick={onMenuClick} aria-label="Abrir menu" sx={{ color: 'text.primary' }}>
+        <MenuIcon />
+      </IconButton>
+      <Brand />
     </header>
   )
 }

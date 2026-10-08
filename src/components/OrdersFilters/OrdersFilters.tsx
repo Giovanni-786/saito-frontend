@@ -1,23 +1,26 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import type { FormEvent } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import { useIsFetching, useQueryClient } from '@tanstack/react-query'
 import TextField from '@mui/material/TextField'
-import Button from '@mui/material/Button'
+import IconButton from '@mui/material/IconButton'
 import InputAdornment from '@mui/material/InputAdornment'
-import { lighten } from '@mui/material/styles'
+import CircularProgress from '@mui/material/CircularProgress'
 import SearchIcon from '@mui/icons-material/Search'
-import ClearIcon from '@mui/icons-material/Clear'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import { applyOrdersSearchAtom, clearOrdersSearchAtom, ordersSearchAtom } from '../../store'
 
+/** Espera depois da última tecla antes de buscar. */
+const SEARCH_DEBOUNCE_MS = 400
+
 /**
- * Filtros da listagem de atendimentos.
+ * Busca da listagem de atendimentos.
  *
  * O backend tem um único filtro, `busca`, que procura o texto em cliente,
  * veículo, placa, telefone, serviços/peças e observação ao mesmo tempo.
  *
- * A busca só é aplicada ao enviar (Enter ou botão), não a cada tecla — assim
- * não sai uma requisição por letra digitada.
+ * A busca é aplicada quando a pessoa para de digitar (debounce), não a cada
+ * tecla, para não sair uma requisição por letra. Enter busca na hora.
  */
 function OrdersFilters() {
   const appliedSearch = useAtomValue(ordersSearchAtom)
@@ -27,16 +30,31 @@ function OrdersFilters() {
 
   const [search, setSearch] = useState(appliedSearch)
 
-  /** A listagem está buscando? Serve para o loading do botão. */
+  /**
+   * A busca também pode ser limpa de fora (botão do estado vazio). Nesse caso o
+   * campo acompanha; quando a mudança veio do próprio debounce, os textos já batem.
+   */
+  const [lastApplied, setLastApplied] = useState(appliedSearch)
+  if (appliedSearch !== lastApplied) {
+    setLastApplied(appliedSearch)
+    if (appliedSearch !== search.trim()) setSearch(appliedSearch)
+  }
+
+  /** A listagem está buscando? Mostra o spinner dentro do campo. */
   const isFetching = useIsFetching({ queryKey: ['atendimentos'] }) > 0
+
+  useEffect(() => {
+    const timer = setTimeout(() => applySearch(search), SEARCH_DEBOUNCE_MS)
+    return () => clearTimeout(timer)
+  }, [search, applySearch])
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
 
     // Mesmo texto de antes não muda a query, então nada seria buscado. Aqui
-    // "Buscar" força a ida ao backend para trazer dados atualizados.
+    // Enter força a ida ao backend para trazer dados atualizados.
     if (search.trim() === appliedSearch) {
-      queryClient.invalidateQueries({ queryKey: ['atendimentos'] })
+      void queryClient.invalidateQueries({ queryKey: ['atendimentos'] })
       return
     }
 
@@ -49,65 +67,53 @@ function OrdersFilters() {
   }
 
   return (
-    <form
-      role="search"
-      onSubmit={handleSubmit}
-      className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:items-center"
-    >
+    <form role="search" onSubmit={handleSubmit} className="w-full sm:max-w-105">
       <TextField
-        label="Buscar"
-        placeholder="Cliente, veículo, placa, telefone..."
         value={search}
         onChange={(event) => setSearch(event.target.value)}
-        size="small"
-        sx={{ minWidth: { sm: 320 } }}
+        placeholder="Buscar por cliente, veículo, placa ou serviço"
+        fullWidth
         slotProps={{
+          htmlInput: {
+            'aria-label': 'Buscar atendimentos',
+            type: 'search',
+            enterKeyHint: 'search',
+          },
           input: {
+            sx: {
+              height: 44,
+              // Esconde o "x" nativo do input search: o nosso já faz isso.
+              '& input::-webkit-search-cancel-button': { display: 'none' },
+            },
             startAdornment: (
               <InputAdornment position="start">
-                <SearchIcon fontSize="small" />
+                <SearchIcon fontSize="small" sx={{ color: 'text.secondary' }} />
+              </InputAdornment>
+            ),
+            endAdornment: (isFetching || search) && (
+              <InputAdornment position="end" sx={{ gap: 0.5 }}>
+                {isFetching && (
+                  <CircularProgress
+                    size={16}
+                    aria-label="Buscando"
+                    sx={{ color: 'text.secondary' }}
+                  />
+                )}
+                {search && (
+                  <IconButton
+                    size="small"
+                    edge="end"
+                    onClick={handleClear}
+                    aria-label="Limpar busca"
+                  >
+                    <CloseRoundedIcon fontSize="small" />
+                  </IconButton>
+                )}
               </InputAdornment>
             ),
           },
         }}
       />
-
-      <div className="flex gap-2">
-        {/* `loading` do MUI desabilita o botão e troca o ícone pelo spinner
-            enquanto a API responde — sem clique duplo disparando outra busca. */}
-        <Button
-          type="submit"
-          variant="contained"
-          loading={isFetching}
-          loadingPosition="start"
-          startIcon={<SearchIcon />}
-          sx={{
-            textTransform: 'none',
-            fontWeight: 600,
-            // Mesma cor do Header (deep-blue); o hover só clareia um pouco.
-            bgcolor: 'primary.dark',
-            '&:hover': { bgcolor: (theme) => lighten(theme.palette.primary.dark, 0.08) },
-            // Carregando, o MUI desabilita o botão e o pinta de cinza. Como a API
-            // responde rápido, isso virava uma piscada azul-cinza-azul. Mantendo as
-            // cores, só o ícone troca pelo spinner.
-            '&.Mui-disabled': { bgcolor: 'primary.dark', color: 'common.white' },
-          }}
-        >
-          Buscar
-        </Button>
-
-        {/* Sem filtro aplicado não há o que limpar, então fica desabilitado. */}
-        <Button
-          type="button"
-          variant="outlined"
-          onClick={handleClear}
-          disabled={!appliedSearch}
-          startIcon={<ClearIcon />}
-          sx={{ textTransform: 'none', fontWeight: 600 }}
-        >
-          Limpar
-        </Button>
-      </div>
     </form>
   )
 }
