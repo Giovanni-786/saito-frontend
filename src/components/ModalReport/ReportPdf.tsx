@@ -87,12 +87,9 @@ const styles = StyleSheet.create({
   },
   forecastDate: { fontFamily: 'Helvetica-Bold', fontSize: 14, color: COLORS.deepBlue },
 
-  responsible: {
-    marginTop: 36,
-    fontFamily: 'Helvetica-Bold',
-    fontSize: 9.5,
-    textTransform: 'uppercase',
-  },
+  signature: { width: 230, marginTop: 60, alignItems: 'center' },
+  signatureLine: { width: '100%', borderTopWidth: 1, borderTopColor: COLORS.text, marginBottom: 5 },
+  signatureName: { fontFamily: 'Helvetica-Bold', fontSize: 9.5, textTransform: 'uppercase' },
 
   footer: {
     position: 'absolute',
@@ -212,8 +209,12 @@ function ReportPdf({ values, issuedAt }: ReportPdfProps) {
             </View>
           )}
 
-          {/* O documento não é assinado: só identifica o responsável pelo nome. */}
-          <Text style={styles.responsible}>{WORKSHOP.responsible}</Text>
+          {/* Linha para assinar com o nome do responsável embaixo. `wrap={false}`:
+              a linha e o nome nunca ficam separados entre páginas. */}
+          <View style={styles.signature} wrap={false}>
+            <View style={styles.signatureLine} />
+            <Text style={styles.signatureName}>{WORKSHOP.responsible}</Text>
+          </View>
         </View>
 
         <View style={styles.footer} fixed>
