@@ -2,6 +2,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import DeleteOrderDialog from '../DeleteOrderDialog/DeleteOrderDialog'
 import Header from '../Header/Header'
+import ModalBudget from '../ModalBudget/ModalBudget'
 import ModalNewOrder from '../ModalNewOrder/ModalNewOrder'
 import ModalReport from '../ModalReport/ModalReport'
 import Sidebar from '../Sidebar/Sidebar'
@@ -13,8 +14,8 @@ type LayoutProps = {
 
 /**
  * Estrutura comum das telas autenticadas: header no topo, sidebar à esquerda,
- * conteúdo centralizado e as modais globais (atendimento, laudo, exclusão e
- * saída), abertas por atoms a partir do Header, da Sidebar e do grid.
+ * conteúdo centralizado e as modais globais (atendimento, orçamento, laudo,
+ * exclusão e saída), abertas por atoms a partir do Header, da Sidebar e do grid.
  */
 function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)
@@ -30,6 +31,7 @@ function Layout({ children }: LayoutProps) {
         </main>
       </div>
       <ModalNewOrder />
+      <ModalBudget />
       <ModalReport />
       <DeleteOrderDialog />
       <SignOutDialog />

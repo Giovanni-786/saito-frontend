@@ -49,7 +49,7 @@ function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
               <DescriptionOutlinedIcon />
             </ListItemIcon>
             <ListItemText
-              primary="Laudo"
+              primary="Laudo seguradora"
               slotProps={{ primary: { sx: { fontWeight: 500, color: 'primary.dark' } } }}
             />
           </ListItemButton>

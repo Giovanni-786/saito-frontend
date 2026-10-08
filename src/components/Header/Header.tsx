@@ -1,7 +1,7 @@
 import { useSetAtom } from 'jotai'
 import IconButton from '@mui/material/IconButton'
 import MenuIcon from '@mui/icons-material/Menu'
-import { openNewOrderModalAtom } from '../../store'
+import { openBudgetModalAtom, openNewOrderModalAtom } from '../../store'
 
 type HeaderProps = {
   /** Abre a Sidebar no mobile. No desktop ela já fica visível e o botão some. */
@@ -9,12 +9,13 @@ type HeaderProps = {
 }
 
 /**
- * Header global da aplicação: marca à esquerda, ação principal à direita.
+ * Header global da aplicação: marca à esquerda, ações principais à direita.
  * Renderizado uma vez no Layout, acima de qualquer conteúdo de página.
  * Laudo e Sair ficam na Sidebar.
  */
 function Header({ onMenuClick }: HeaderProps) {
   const openNewOrder = useSetAtom(openNewOrderModalAtom)
+  const openBudget = useSetAtom(openBudgetModalAtom)
 
   return (
     <header className="bg-deep-blue">
@@ -31,17 +32,27 @@ function Header({ onMenuClick }: HeaderProps) {
           <span className="text-lg font-semibold tracking-tight text-white">Saito Oficina</span>
         </div>
 
-        <button
-          type="button"
-          onClick={openNewOrder}
-          className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-saito-blue shadow-sm transition-colors hover:bg-light-blue focus-visible:outline-white"
-        >
-          {/* O "+" é decorativo: o texto do botão já diz a ação para leitores de tela. */}
-          <span aria-hidden="true" className="text-base leading-none">
-            +
-          </span>
-          Novo atendimento
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={openNewOrder}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-lg bg-white px-4 py-2 text-sm font-semibold text-saito-blue shadow-sm transition-colors hover:bg-light-blue focus-visible:outline-white"
+          >
+            {/* O "+" é decorativo: o texto do botão já diz a ação para leitores de tela. */}
+            <span aria-hidden="true" className="text-base leading-none">
+              +
+            </span>
+            Novo atendimento
+          </button>
+
+          <button
+            type="button"
+            onClick={openBudget}
+            className="inline-flex shrink-0 items-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-saito-blue shadow-sm transition-colors hover:bg-light-blue focus-visible:outline-white"
+          >
+            Orçamento
+          </button>
+        </div>
       </div>
     </header>
   )
