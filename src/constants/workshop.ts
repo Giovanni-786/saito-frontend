@@ -11,6 +11,7 @@ export const WORKSHOP = {
   district: 'Vila Lemos',
   city: 'Bauru - SP',
   zipCode: '17063-060',
+  phone: '(14) 3232-6616',
   /** Quem assina o laudo: o nome vai embaixo da linha de assinatura. */
   responsible: 'José Gilberto Saito de Oliveira',
 } as const

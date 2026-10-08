@@ -1,8 +1,9 @@
 import { createElement } from 'react'
 import type { ReactElement } from 'react'
 import type { DocumentProps } from '@react-pdf/renderer'
+import { downloadBlob } from '../../utils/downloadBlob'
+import { today } from '../../utils/today'
 import type { ReportFormValues } from './reportValues'
-import { today } from './reportValues'
 
 /**
  * Gera o PDF do laudo e baixa o arquivo.
@@ -28,15 +29,4 @@ export async function generateReportPdf(values: ReportFormValues) {
   const blob = await pdf(reportDocument).toBlob()
 
   downloadBlob(blob, `laudo-${values.plate}-${issuedAt}.pdf`)
-}
-
-/** Dispara o download pelo navegador e libera a URL temporária em seguida. */
-function downloadBlob(blob: Blob, fileName: string) {
-  const url = URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = fileName
-  link.click()
-  // Revogar na mesma hora pode cancelar o download em alguns navegadores.
-  setTimeout(() => URL.revokeObjectURL(url), 1000)
 }

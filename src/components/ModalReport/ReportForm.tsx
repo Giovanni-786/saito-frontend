@@ -1,11 +1,12 @@
 import { useState } from 'react'
-import type { FormEvent, ReactNode } from 'react'
+import type { FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
 import { maskCpf, normalizeChassis, normalizePlate, onlyDigits } from '../../utils/masks'
+import Section from '../FormSection/FormSection'
 import { initialValues, validate } from './reportValues'
 import type { ReportFormValues } from './reportValues'
 import { generateReportPdf } from './generateReportPdf'
@@ -13,23 +14,6 @@ import { generateReportPdf } from './generateReportPdf'
 type ReportFormProps = {
   /** Chamado ao cancelar. Gerar o PDF não fecha: dá para ajustar e gerar de novo. */
   onClose: () => void
-}
-
-type SectionProps = {
-  title: string
-  children: ReactNode
-}
-
-/** Bloco do formulário com título, espelhando as seções do PDF. */
-function Section({ title, children }: SectionProps) {
-  return (
-    <fieldset className="grid grid-cols-1 gap-4 sm:grid-cols-6">
-      <legend className="mb-3 text-sm font-semibold tracking-wide text-deep-blue uppercase">
-        {title}
-      </legend>
-      {children}
-    </fieldset>
-  )
 }
 
 /**
