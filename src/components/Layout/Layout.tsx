@@ -15,7 +15,7 @@ type LayoutProps = {
 /**
  * Estrutura comum das telas autenticadas: header no topo, sidebar à esquerda,
  * conteúdo centralizado e as modais globais (atendimento, orçamento, laudo,
- * exclusão e saída), abertas por atoms a partir do Header, da Sidebar e do grid.
+ * exclusão e saída), abertas por atoms a partir da Sidebar e do grid.
  */
 function Layout({ children }: LayoutProps) {
   const [sidebarOpen, setSidebarOpen] = useState(false)

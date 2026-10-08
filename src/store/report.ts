@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
 
-/** A modal de laudo está aberta? Estado global: o Header abre, a modal fecha. */
+/** A modal de laudo está aberta? Estado global: a Sidebar abre, a modal fecha. */
 export const reportModalAtom = atom(false)
 
 /** Ações prontas para `useSetAtom` — evitam espalhar `set(atom, true/false)` pelos componentes. */

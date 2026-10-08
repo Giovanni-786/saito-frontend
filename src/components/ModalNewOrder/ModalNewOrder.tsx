@@ -29,7 +29,7 @@ function SlideUpTransition(props: TransitionSlotProps) {
 /**
  * Modal fullscreen de atendimento: cadastro ou edição, conforme o `orderId`.
  *
- * Não recebe props: lê o estado do `orderModalAtom`. O Header abre para cadastro
+ * Não recebe props: lê o estado do `orderModalAtom`. A Sidebar abre para cadastro
  * (`openNewOrderModalAtom`) e o grid abre para edição (`openEditOrderModalAtom`).
  */
 function ModalNewOrder() {

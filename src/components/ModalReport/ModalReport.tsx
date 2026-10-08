@@ -23,7 +23,7 @@ function SlideUpTransition(props: TransitionSlotProps) {
 
 /**
  * Modal fullscreen de laudo. Não recebe props: lê o estado do
- * `reportModalAtom`. Quem abre é o Header (`openReportModalAtom`).
+ * `reportModalAtom`. Quem abre é a Sidebar (`openReportModalAtom`).
  */
 function ModalReport() {
   const open = useAtomValue(reportModalAtom)

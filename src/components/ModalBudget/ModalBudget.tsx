@@ -23,7 +23,7 @@ function SlideUpTransition(props: TransitionSlotProps) {
 
 /**
  * Modal fullscreen de orçamento. Não recebe props: lê o estado do
- * `budgetModalAtom`. Quem abre é o Header (`openBudgetModalAtom`).
+ * `budgetModalAtom`. Quem abre é a Sidebar (`openBudgetModalAtom`).
  */
 function ModalBudget() {
   const open = useAtomValue(budgetModalAtom)

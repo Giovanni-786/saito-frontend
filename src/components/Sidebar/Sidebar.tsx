@@ -6,9 +6,16 @@ import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
 import ListItemText from '@mui/material/ListItemText'
+import AddCircleOutlinedIcon from '@mui/icons-material/AddCircleOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { openReportModalAtom, openSignOutDialogAtom } from '../../store'
+import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined'
+import {
+  openBudgetModalAtom,
+  openNewOrderModalAtom,
+  openReportModalAtom,
+  openSignOutDialogAtom,
+} from '../../store'
 
 const DRAWER_WIDTH = 240
 
@@ -23,9 +30,11 @@ type SidebarProps = {
  * Mobile: gaveta temporária aberta pelo botão de menu do Header.
  *
  * Os itens só abrem as modais globais via atoms; quem faz o trabalho são o
- * ModalReport e o SignOutDialog.
+ * ModalNewOrder, o ModalBudget, o ModalReport e o SignOutDialog.
  */
 function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
+  const openNewOrder = useSetAtom(openNewOrderModalAtom)
+  const openBudget = useSetAtom(openBudgetModalAtom)
   const openReport = useSetAtom(openReportModalAtom)
   const openSignOut = useSetAtom(openSignOutDialogAtom)
 
@@ -43,6 +52,30 @@ function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
       </div>
 
       <List sx={{ py: 2 }}>
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => select(openNewOrder)}>
+            <ListItemIcon sx={{ color: 'primary.main', minWidth: 40 }}>
+              <AddCircleOutlinedIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Novo atendimento"
+              slotProps={{ primary: { sx: { fontWeight: 500, color: 'primary.dark' } } }}
+            />
+          </ListItemButton>
+        </ListItem>
+
+        <ListItem disablePadding>
+          <ListItemButton onClick={() => select(openBudget)}>
+            <ListItemIcon sx={{ color: 'primary.main', minWidth: 40 }}>
+              <RequestQuoteOutlinedIcon />
+            </ListItemIcon>
+            <ListItemText
+              primary="Orçamento"
+              slotProps={{ primary: { sx: { fontWeight: 500, color: 'primary.dark' } } }}
+            />
+          </ListItemButton>
+        </ListItem>
+
         <ListItem disablePadding>
           <ListItemButton onClick={() => select(openReport)}>
             <ListItemIcon sx={{ color: 'primary.main', minWidth: 40 }}>
