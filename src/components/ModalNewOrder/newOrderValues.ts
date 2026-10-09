@@ -1,4 +1,5 @@
 import type { NewOrder, Order } from '../../services/orders'
+import { today } from '../../utils/today'
 
 /**
  * Estado do formulário. Tudo texto, como o input entrega; `phone` e `mileage` só
@@ -20,14 +21,6 @@ export type NewOrderFormErrors = Partial<Record<keyof NewOrderFormValues, string
 
 /** Placa antiga (ABC1234) ou Mercosul (ABC1D23). */
 const PLATE_PATTERN = /^[A-Z]{3}\d[A-Z0-9]\d{2}$/
-
-/** Hoje em AAAA-MM-DD no fuso local. `toISOString` usaria UTC e poderia voltar um dia. */
-function today() {
-  const now = new Date()
-  const month = String(now.getMonth() + 1).padStart(2, '0')
-  const day = String(now.getDate()).padStart(2, '0')
-  return `${now.getFullYear()}-${month}-${day}`
-}
 
 export function initialValues(): NewOrderFormValues {
   return {

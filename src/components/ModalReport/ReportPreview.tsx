@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { WORKSHOP } from '../../constants/workshop'
 import { formatDate } from '../../utils/formatDate'
 import { maskCpf } from '../../utils/masks'
-import { today } from './reportValues'
+import { today } from '../../utils/today'
 import type { ReportFormValues } from './reportValues'
 
 type PreviewFieldProps = {
@@ -144,7 +144,10 @@ function ReportPreview({ values }: ReportPreviewProps) {
           </PreviewSection>
         )}
 
-        <span className="mt-6 text-[10.5px] font-bold uppercase">{WORKSHOP.responsible}</span>
+        <div className="mt-10 flex w-56 flex-col items-center gap-1">
+          <span className="w-full border-t border-content" />
+          <span className="text-[10.5px] font-bold uppercase">{WORKSHOP.responsible}</span>
+        </div>
 
         <span className="mt-auto border-t border-line-strong pt-1.5 text-[9px] text-content-muted">
           {WORKSHOP.tradeName} · CNPJ {WORKSHOP.cnpj}

@@ -12,6 +12,7 @@
  */
 export { store } from './store'
 export * from './auth'
+export * from './budget'
 export * from './deleteOrder'
 export * from './newOrder'
 export * from './orderFilters'

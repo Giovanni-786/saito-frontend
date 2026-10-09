@@ -7,7 +7,13 @@ import Tooltip from '@mui/material/Tooltip'
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
 import LogoutIcon from '@mui/icons-material/Logout'
-import { openReportModalAtom, openSignOutDialogAtom, userEmailAtom } from '../../store'
+import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined'
+import {
+  openBudgetModalAtom,
+  openReportModalAtom,
+  openSignOutDialogAtom,
+  userEmailAtom,
+} from '../../store'
 import Brand from '../Brand/Brand'
 
 export const SIDEBAR_WIDTH = 248
@@ -29,7 +35,7 @@ type NavButtonProps = {
   onClick: () => void
 }
 
-/** Item que abre uma modal (Laudo): visual de link, comportamento de botão. */
+/** Item que abre uma modal (Orçamento, Laudo): visual de link, comportamento de botão. */
 function NavButton({ icon, label, onClick }: NavButtonProps) {
   return (
     <button type="button" onClick={onClick} className={`${navItemClass} ${navIdleClass}`}>
@@ -43,10 +49,11 @@ function NavButton({ icon, label, onClick }: NavButtonProps) {
  * Menu lateral global. Desktop (md+): coluna fixa à esquerda, com a marca no
  * topo e o usuário no rodapé. Mobile: gaveta aberta pelo botão do Header.
  *
- * "Laudo" e "Sair" só abrem as modais globais via atoms; quem faz o trabalho
- * são o ModalReport e o SignOutDialog.
+ * "Orçamento", "Laudo seguradora" e "Sair" só abrem as modais globais via atoms;
+ * quem faz o trabalho são o ModalBudget, o ModalReport e o SignOutDialog.
  */
 function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
+  const openBudget = useSetAtom(openBudgetModalAtom)
   const openReport = useSetAtom(openReportModalAtom)
   const openSignOut = useSetAtom(openSignOutDialogAtom)
   const email = useAtomValue(userEmailAtom)
@@ -79,8 +86,13 @@ function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
           Atendimentos
         </NavLink>
         <NavButton
+          icon={<RequestQuoteOutlinedIcon sx={{ fontSize: 20 }} aria-hidden="true" />}
+          label="Orçamento"
+          onClick={() => select(openBudget)}
+        />
+        <NavButton
           icon={<DescriptionOutlinedIcon sx={{ fontSize: 20 }} aria-hidden="true" />}
-          label="Laudo"
+          label="Laudo seguradora"
           onClick={() => select(openReport)}
         />
       </nav>

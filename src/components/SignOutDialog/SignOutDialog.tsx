@@ -11,7 +11,7 @@ import { closeSignOutDialogAtom, signOutAtom, signOutDialogAtom } from '../../st
 /**
  * Confirmação antes de encerrar a sessão, no mesmo formato da de exclusão.
  *
- * Não recebe props: lê o `signOutDialogAtom`, que o botão "Sair" do Header abre.
+ * Não recebe props: lê o `signOutDialogAtom`, que o item "Sair" da Sidebar abre.
  * Sair não chama a API (só limpa o token), então não há estado de carregamento.
  */
 function SignOutDialog() {

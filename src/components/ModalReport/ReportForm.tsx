@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import type { FormEvent, ReactNode } from 'react'
+import type { FormEvent } from 'react'
 import { useMutation } from '@tanstack/react-query'
 import { toast } from 'sonner'
 import TextField from '@mui/material/TextField'
@@ -10,6 +10,7 @@ import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined
 import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined'
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined'
 import { maskCpf, normalizeChassis, normalizePlate, onlyDigits } from '../../utils/masks'
+import Section from '../FormSection/FormSection'
 import { initialValues, validate } from './reportValues'
 import type { ReportFormValues } from './reportValues'
 import { generateReportPdf } from './generateReportPdf'
@@ -18,32 +19,6 @@ import ReportPreview from './ReportPreview'
 type ReportFormProps = {
   /** Chamado ao cancelar. Gerar o PDF não fecha: dá para ajustar e gerar de novo. */
   onClose: () => void
-}
-
-type SectionProps = {
-  title: string
-  description: string
-  icon: ReactNode
-  children: ReactNode
-}
-
-/** Card do formulário com ícone e título, espelhando as seções do PDF. */
-function Section({ title, description, icon, children }: SectionProps) {
-  return (
-    <fieldset className="min-w-0 rounded-2xl border border-line bg-surface p-5 sm:p-6">
-      <legend className="sr-only">{title}</legend>
-      <div aria-hidden="true" className="mb-5 flex items-center gap-3">
-        <div className="flex size-10 shrink-0 items-center justify-center rounded-[11px] bg-light-blue text-saito-blue">
-          {icon}
-        </div>
-        <div className="flex flex-col gap-0.5">
-          <span className="text-base font-semibold tracking-tight">{title}</span>
-          <span className="text-[13px] text-content-muted">{description}</span>
-        </div>
-      </div>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-6">{children}</div>
-    </fieldset>
-  )
 }
 
 /**

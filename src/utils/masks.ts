@@ -52,6 +52,11 @@ export function normalizeChassis(value: string) {
     .slice(0, 17)
 }
 
+/** Ano do veículo: "2017" ou fabricação/modelo "20172018" -> "2017/2018". */
+export function maskVehicleYear(digits: string) {
+  return digits.length > 4 ? `${digits.slice(0, 4)}/${digits.slice(4)}` : digits
+}
+
 /** "85000" -> "85.000". */
 export function maskInteger(digits: string) {
   return digits ? Number(digits).toLocaleString('pt-BR') : ''

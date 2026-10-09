@@ -7,7 +7,7 @@ type OrderModalState = {
 }
 
 /**
- * Estado global da modal de atendimento. O Header abre para cadastro, o grid
+ * Estado global da modal de atendimento. A Sidebar abre para cadastro, o grid
  * abre para edição e a própria modal fecha.
  */
 export const orderModalAtom = atom<OrderModalState>({ open: false, orderId: null })
