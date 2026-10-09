@@ -1,12 +1,9 @@
 import type { ReactElement, Ref } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
 import Dialog from '@mui/material/Dialog'
-import AppBar from '@mui/material/AppBar'
-import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
 import Slide from '@mui/material/Slide'
-import CloseIcon from '@mui/icons-material/Close'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import type { TransitionProps } from '@mui/material/transitions'
 import { budgetModalAtom, closeBudgetModalAtom } from '../../store'
 import BudgetForm from './BudgetForm'
@@ -22,8 +19,11 @@ function SlideUpTransition(props: TransitionSlotProps) {
 }
 
 /**
- * Modal fullscreen de orçamento. Não recebe props: lê o estado do
- * `budgetModalAtom`. Quem abre é a Sidebar (`openBudgetModalAtom`).
+ * Modal fullscreen de orçamento, no mesmo formato da de laudo: barra branca no
+ * topo, formulário em cards e ações num rodapé fixo (BudgetForm).
+ *
+ * Não recebe props: lê o estado do `budgetModalAtom`. Quem abre é a Sidebar
+ * (`openBudgetModalAtom`).
  */
 function ModalBudget() {
   const open = useAtomValue(budgetModalAtom)
@@ -35,23 +35,24 @@ function ModalBudget() {
       open={open}
       onClose={close}
       slots={{ transition: SlideUpTransition }}
+      slotProps={{ paper: { sx: { borderRadius: 0 } } }}
       aria-labelledby="modal-budget-title"
     >
-      <AppBar sx={{ position: 'relative' }} className="bg-deep-blue!">
-        <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={close} aria-label="Fechar">
-            <CloseIcon />
-          </IconButton>
-          <Typography id="modal-budget-title" sx={{ ml: 2, flex: 1 }} variant="h6" component="h2">
-            Orçamento
-          </Typography>
-        </Toolbar>
-      </AppBar>
+      <header className="flex items-center gap-3 border-b border-line bg-surface px-3 py-3 sm:px-6 lg:px-8">
+        <IconButton onClick={close} aria-label="Fechar" sx={{ color: 'text.secondary' }}>
+          <CloseRoundedIcon />
+        </IconButton>
+        <div className="flex min-w-0 flex-col leading-tight">
+          <h2 id="modal-budget-title" className="text-[17px] font-semibold tracking-tight">
+            Novo orçamento
+          </h2>
+          <p className="truncate text-[13px] text-content-muted">
+            Preencha os dados e os itens para gerar o PDF do orçamento.
+          </p>
+        </div>
+      </header>
 
-      {/* Coluna flex + my-auto no form: centraliza quando cabe e rola quando não cabe. */}
-      <div className="flex flex-1 flex-col overflow-y-auto bg-surface-muted px-4 py-8 sm:px-6">
-        <BudgetForm onClose={close} />
-      </div>
+      <BudgetForm onClose={close} />
     </Dialog>
   )
 }

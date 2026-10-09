@@ -8,9 +8,12 @@ import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import Alert from '@mui/material/Alert'
-import AddIcon from '@mui/icons-material/Add'
-import DeleteIcon from '@mui/icons-material/Delete'
-import PictureAsPdfIcon from '@mui/icons-material/PictureAsPdf'
+import AddRoundedIcon from '@mui/icons-material/AddRounded'
+import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
+import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined'
+import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
+import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined'
+import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined'
 import {
   maskCurrency,
   maskPhone,
@@ -113,263 +116,277 @@ function BudgetForm({ onClose }: BudgetFormProps) {
 
   return (
     // noValidate: quem valida e escreve as mensagens é o app, não o navegador.
-    <form
-      onSubmit={handleSubmit}
-      noValidate
-      className="mx-auto my-auto flex w-full max-w-4xl flex-col gap-8 rounded-2xl border border-line bg-surface p-6 shadow-sm sm:p-8"
-    >
-      <p className="text-sm text-content-muted">
-        Preencha os dados para gerar o PDF do orçamento. Campos com * são obrigatórios.
-      </p>
+    // O corpo rola; o rodapé com as ações fica fixo embaixo da modal.
+    <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
+      <div className="flex-1 overflow-y-auto bg-canvas px-4 py-6 sm:px-6 lg:px-8 lg:py-8">
+        <div className="mx-auto flex max-w-4xl flex-col gap-5">
+          <Section
+            title="Cliente e veículo"
+            description="Para quem é o orçamento e qual o veículo."
+            icon={<DirectionsCarOutlinedIcon fontSize="small" />}
+          >
+            <TextField
+              label="Cliente"
+              value={values.customerName}
+              onChange={(event) => setField('customerName', event.target.value)}
+              error={!!errors.customerName}
+              helperText={errors.customerName}
+              autoComplete="off"
+              autoFocus
+              required
+              disabled={disabled}
+              className="sm:col-span-4"
+            />
 
-      <Section title="Cliente e veículo">
-        <TextField
-          label="Cliente"
-          value={values.customerName}
-          onChange={(event) => setField('customerName', event.target.value)}
-          error={!!errors.customerName}
-          helperText={errors.customerName}
-          autoComplete="off"
-          autoFocus
-          required
-          disabled={disabled}
-          className="sm:col-span-4"
-        />
+            <TextField
+              label="Fone"
+              value={maskPhone(values.phone)}
+              onChange={(event) => setField('phone', onlyDigits(event.target.value).slice(0, 11))}
+              error={!!errors.phone}
+              helperText={errors.phone}
+              placeholder="(14) 99999-9999"
+              disabled={disabled}
+              slotProps={{ htmlInput: { inputMode: 'tel' } }}
+              className="sm:col-span-2"
+            />
 
-        <TextField
-          label="Fone"
-          value={maskPhone(values.phone)}
-          onChange={(event) => setField('phone', onlyDigits(event.target.value).slice(0, 11))}
-          error={!!errors.phone}
-          helperText={errors.phone}
-          placeholder="(14) 99999-9999"
-          disabled={disabled}
-          slotProps={{ htmlInput: { inputMode: 'tel' } }}
-          className="sm:col-span-2"
-        />
+            <TextField
+              label="Veículo"
+              value={values.vehicle}
+              onChange={(event) => setField('vehicle', event.target.value)}
+              error={!!errors.vehicle}
+              helperText={errors.vehicle}
+              placeholder="Hyundai"
+              required
+              disabled={disabled}
+              className="sm:col-span-3"
+            />
 
-        <TextField
-          label="Veículo"
-          value={values.vehicle}
-          onChange={(event) => setField('vehicle', event.target.value)}
-          error={!!errors.vehicle}
-          helperText={errors.vehicle}
-          placeholder="Hyundai"
-          required
-          disabled={disabled}
-          className="sm:col-span-3"
-        />
+            <TextField
+              label="Modelo"
+              value={values.model}
+              onChange={(event) => setField('model', event.target.value)}
+              placeholder="IX35 GL"
+              disabled={disabled}
+              className="sm:col-span-3"
+            />
 
-        <TextField
-          label="Modelo"
-          value={values.model}
-          onChange={(event) => setField('model', event.target.value)}
-          placeholder="IX35 GL"
-          disabled={disabled}
-          className="sm:col-span-3"
-        />
+            <TextField
+              label="Placa"
+              value={values.plate}
+              onChange={(event) => setField('plate', normalizePlate(event.target.value))}
+              error={!!errors.plate}
+              helperText={errors.plate}
+              placeholder="ABC1D23"
+              disabled={disabled}
+              slotProps={{ htmlInput: { autoCapitalize: 'characters' } }}
+              className="sm:col-span-2"
+            />
 
-        <TextField
-          label="Placa"
-          value={values.plate}
-          onChange={(event) => setField('plate', normalizePlate(event.target.value))}
-          error={!!errors.plate}
-          helperText={errors.plate}
-          placeholder="ABC1D23"
-          disabled={disabled}
-          slotProps={{ htmlInput: { autoCapitalize: 'characters' } }}
-          className="sm:col-span-2"
-        />
+            <TextField
+              label="Ano"
+              value={maskVehicleYear(values.year)}
+              onChange={(event) => setField('year', onlyDigits(event.target.value).slice(0, 8))}
+              error={!!errors.year}
+              helperText={errors.year}
+              placeholder="2017/2018"
+              disabled={disabled}
+              slotProps={{ htmlInput: { inputMode: 'numeric' } }}
+              className="sm:col-span-2"
+            />
 
-        <TextField
-          label="Ano"
-          value={maskVehicleYear(values.year)}
-          onChange={(event) => setField('year', onlyDigits(event.target.value).slice(0, 8))}
-          error={!!errors.year}
-          helperText={errors.year}
-          placeholder="2017/2018"
-          disabled={disabled}
-          slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-          className="sm:col-span-2"
-        />
+            <TextField
+              select
+              label="Combustível"
+              value={values.fuel}
+              onChange={(event) => setField('fuel', event.target.value)}
+              disabled={disabled}
+              className="sm:col-span-2"
+            >
+              <MenuItem value="">
+                <em>Não informado</em>
+              </MenuItem>
+              {FUEL_OPTIONS.map((fuel) => (
+                <MenuItem key={fuel} value={fuel}>
+                  {fuel}
+                </MenuItem>
+              ))}
+            </TextField>
+          </Section>
 
-        <TextField
-          select
-          label="Combustível"
-          value={values.fuel}
-          onChange={(event) => setField('fuel', event.target.value)}
-          disabled={disabled}
-          className="sm:col-span-2"
-        >
-          <MenuItem value="">
-            <em>Não informado</em>
-          </MenuItem>
-          {FUEL_OPTIONS.map((fuel) => (
-            <MenuItem key={fuel} value={fuel}>
-              {fuel}
-            </MenuItem>
-          ))}
-        </TextField>
-      </Section>
+          <Section
+            title="Produtos e serviços"
+            description="Peças e serviços cobrados, com quantidade e preço."
+            icon={<Inventory2OutlinedIcon fontSize="small" />}
+          >
+            <div className="flex flex-col gap-3 sm:col-span-6">
+              {/* Cabeçalho da tabela: some no celular, onde cada linha vira um cartão. */}
+              <div className="hidden grid-cols-12 gap-3 px-1 text-xs font-semibold tracking-wide text-content-muted uppercase sm:grid">
+                <span className="col-span-2">Quant.</span>
+                <span className="col-span-5">Produto</span>
+                <span className="col-span-2">Preço unit.</span>
+                <span className="col-span-2 text-right">Subtotal</span>
+              </div>
 
-      <Section title="Produtos e serviços">
-        <div className="flex flex-col gap-3 sm:col-span-6">
-          {/* Cabeçalho da tabela: some no celular, onde cada linha vira um cartão. */}
-          <div className="hidden grid-cols-12 gap-3 px-1 text-xs font-semibold tracking-wide text-content-muted uppercase sm:grid">
-            <span className="col-span-2">Quant.</span>
-            <span className="col-span-5">Produto</span>
-            <span className="col-span-2">Preço unit.</span>
-            <span className="col-span-2 text-right">Subtotal</span>
-          </div>
-
-          {/* Até 5 linhas a lista cresce com a página; a partir da 6ª ganha rolagem
+              {/* Até 5 linhas a lista cresce com a página; a partir da 6ª ganha rolagem
               própria, e o cabeçalho, o "Adicionar item" e os totais seguem visíveis.
               O pt-2 dá espaço para o rótulo flutuante da primeira linha não ser cortado. */}
-          <div
-            className={
-              values.items.length > MAX_VISIBLE_ITEMS
-                ? 'flex max-h-[41rem] flex-col gap-3 overflow-y-auto pt-2 pr-1 sm:max-h-[16.5rem]'
-                : 'flex flex-col gap-3 pt-2'
-            }
-          >
-            {values.items.map((item, index) => {
-              const itemErrors = errors.items?.[item.id] ?? {}
+              <div
+                className={
+                  values.items.length > MAX_VISIBLE_ITEMS
+                    ? 'flex max-h-[41rem] flex-col gap-3 overflow-y-auto pt-2 pr-1 sm:max-h-[16.5rem]'
+                    : 'flex flex-col gap-3 pt-2'
+                }
+              >
+                {values.items.map((item, index) => {
+                  const itemErrors = errors.items?.[item.id] ?? {}
 
-              return (
-                <div
-                  key={item.id}
-                  className="grid grid-cols-12 items-start gap-3 rounded-xl border border-line p-3 sm:rounded-none sm:border-0 sm:p-0"
-                >
-                  <TextField
-                    label="Quant."
-                    value={item.quantity}
-                    onChange={(event) =>
-                      setItemField(item.id, 'quantity', onlyDigits(event.target.value).slice(0, 4))
-                    }
-                    error={!!itemErrors.quantity}
-                    size="small"
-                    disabled={disabled}
-                    slotProps={{
-                      htmlInput: {
-                        inputMode: 'numeric',
-                        'aria-label': `Quantidade do item ${index + 1}`,
-                      },
-                    }}
-                    className="col-span-3 sm:col-span-2"
-                  />
-
-                  <TextField
-                    label="Produto"
-                    value={item.description}
-                    onChange={(event) => setItemField(item.id, 'description', event.target.value)}
-                    error={!!itemErrors.description}
-                    helperText={itemErrors.description}
-                    placeholder="Filtro de óleo"
-                    size="small"
-                    autoFocus={item.id === focusItemId}
-                    disabled={disabled}
-                    className="col-span-9 sm:col-span-5"
-                  />
-
-                  <TextField
-                    label="Preço unit."
-                    value={maskCurrency(item.unitPrice)}
-                    onChange={(event) =>
-                      setItemField(item.id, 'unitPrice', toCents(event.target.value))
-                    }
-                    error={!!itemErrors.unitPrice}
-                    helperText={itemErrors.unitPrice}
-                    placeholder="R$ 0,00"
-                    size="small"
-                    disabled={disabled}
-                    slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-                    className="col-span-5 sm:col-span-2"
-                  />
-
-                  <span
-                    className="col-span-5 self-center text-right text-sm font-semibold text-deep-blue tabular-nums sm:col-span-2"
-                    aria-label={`Subtotal do item ${index + 1}`}
-                  >
-                    {maskCurrency(String(itemTotalCents(item))) || 'R$ 0,00'}
-                  </span>
-
-                  {/* Mesma lixeira do grid. O span segura o Tooltip quando o botão
-                      está desabilitado (gerando o PDF), que o MUI não aceita direto. */}
-                  <Tooltip title="Excluir">
-                    <span className="col-span-2 justify-self-end sm:col-span-1">
-                      <IconButton
-                        onClick={() => removeItem(item.id)}
-                        disabled={disabled}
-                        aria-label={`Excluir item ${index + 1}`}
+                  return (
+                    <div
+                      key={item.id}
+                      className="grid grid-cols-12 items-start gap-3 rounded-xl border border-line p-3 sm:rounded-none sm:border-0 sm:p-0"
+                    >
+                      <TextField
+                        label="Quant."
+                        value={item.quantity}
+                        onChange={(event) =>
+                          setItemField(
+                            item.id,
+                            'quantity',
+                            onlyDigits(event.target.value).slice(0, 4),
+                          )
+                        }
+                        error={!!itemErrors.quantity}
                         size="small"
-                        color="error"
+                        disabled={disabled}
+                        slotProps={{
+                          htmlInput: {
+                            inputMode: 'numeric',
+                            'aria-label': `Quantidade do item ${index + 1}`,
+                          },
+                        }}
+                        className="col-span-3 sm:col-span-2"
+                      />
+
+                      <TextField
+                        label="Produto"
+                        value={item.description}
+                        onChange={(event) =>
+                          setItemField(item.id, 'description', event.target.value)
+                        }
+                        error={!!itemErrors.description}
+                        helperText={itemErrors.description}
+                        placeholder="Filtro de óleo"
+                        size="small"
+                        autoFocus={item.id === focusItemId}
+                        disabled={disabled}
+                        className="col-span-9 sm:col-span-5"
+                      />
+
+                      <TextField
+                        label="Preço unit."
+                        value={maskCurrency(item.unitPrice)}
+                        onChange={(event) =>
+                          setItemField(item.id, 'unitPrice', toCents(event.target.value))
+                        }
+                        error={!!itemErrors.unitPrice}
+                        helperText={itemErrors.unitPrice}
+                        placeholder="R$ 0,00"
+                        size="small"
+                        disabled={disabled}
+                        slotProps={{ htmlInput: { inputMode: 'numeric' } }}
+                        className="col-span-5 sm:col-span-2"
+                      />
+
+                      <span
+                        className="col-span-5 self-center text-right text-sm font-semibold text-deep-blue tabular-nums sm:col-span-2"
+                        aria-label={`Subtotal do item ${index + 1}`}
                       >
-                        <DeleteIcon fontSize="small" />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                </div>
-              )
-            })}
-          </div>
+                        {maskCurrency(String(itemTotalCents(item))) || 'R$ 0,00'}
+                      </span>
 
-          <Button
-            type="button"
-            variant="text"
-            onClick={addItem}
-            disabled={disabled}
-            startIcon={<AddIcon />}
-            sx={{ alignSelf: 'flex-start', textTransform: 'none', fontWeight: 600 }}
+                      {/* Mesma lixeira do grid. O span segura o Tooltip quando o botão
+                      está desabilitado (gerando o PDF), que o MUI não aceita direto. */}
+                      <Tooltip title="Excluir">
+                        <span className="col-span-2 justify-self-end sm:col-span-1">
+                          <IconButton
+                            onClick={() => removeItem(item.id)}
+                            disabled={disabled}
+                            aria-label={`Excluir item ${index + 1}`}
+                            size="small"
+                            sx={{
+                              color: 'text.secondary',
+                              '&:hover': { color: 'error.main', bgcolor: 'error.light' },
+                            }}
+                          >
+                            <DeleteOutlineRoundedIcon fontSize="small" />
+                          </IconButton>
+                        </span>
+                      </Tooltip>
+                    </div>
+                  )
+                })}
+              </div>
+
+              <Button
+                type="button"
+                variant="text"
+                onClick={addItem}
+                disabled={disabled}
+                startIcon={<AddRoundedIcon />}
+                sx={{ alignSelf: 'flex-start' }}
+              >
+                Adicionar item
+              </Button>
+            </div>
+          </Section>
+
+          <Section
+            title="Valores"
+            description="Mão de obra e o total calculado na hora."
+            icon={<PaymentsOutlinedIcon fontSize="small" />}
           >
-            Adicionar item
-          </Button>
+            <TextField
+              label="Mão de obra"
+              value={maskCurrency(values.labor)}
+              onChange={(event) => setField('labor', toCents(event.target.value))}
+              placeholder="R$ 0,00"
+              disabled={disabled}
+              slotProps={{ htmlInput: { inputMode: 'numeric' } }}
+              className="self-start sm:col-span-3"
+            />
+
+            {/* Resumo calculado: atualiza a cada tecla, sem precisar gerar o PDF. */}
+            <div className="flex flex-col gap-1 rounded-xl bg-canvas p-4 sm:col-span-3">
+              <div className="flex justify-between text-sm text-content-muted">
+                <span>Produtos</span>
+                <span className="tabular-nums">
+                  {maskCurrency(String(productsTotal)) || 'R$ 0,00'}
+                </span>
+              </div>
+              <div className="flex justify-between text-sm text-content-muted">
+                <span>Mão de obra</span>
+                <span className="tabular-nums">{maskCurrency(values.labor) || 'R$ 0,00'}</span>
+              </div>
+              <div className="mt-2 flex items-baseline justify-between border-t border-line pt-2 text-deep-blue">
+                <span className="text-sm font-semibold tracking-wide uppercase">Total</span>
+                <span className="text-2xl font-semibold tabular-nums">
+                  {maskCurrency(String(total)) || 'R$ 0,00'}
+                </span>
+              </div>
+            </div>
+          </Section>
+
+          {errors.general && (
+            <Alert severity="error" role="alert">
+              {errors.general}
+            </Alert>
+          )}
         </div>
-      </Section>
+      </div>
 
-      <Section title="Valores">
-        <TextField
-          label="Mão de obra"
-          value={maskCurrency(values.labor)}
-          onChange={(event) => setField('labor', toCents(event.target.value))}
-          placeholder="R$ 0,00"
-          disabled={disabled}
-          slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-          className="self-start sm:col-span-3"
-        />
-
-        {/* Resumo calculado: atualiza a cada tecla, sem precisar gerar o PDF. */}
-        <div className="flex flex-col gap-1 rounded-xl bg-surface-muted p-4 sm:col-span-3">
-          <div className="flex justify-between text-sm text-content-muted">
-            <span>Produtos</span>
-            <span className="tabular-nums">{maskCurrency(String(productsTotal)) || 'R$ 0,00'}</span>
-          </div>
-          <div className="flex justify-between text-sm text-content-muted">
-            <span>Mão de obra</span>
-            <span className="tabular-nums">{maskCurrency(values.labor) || 'R$ 0,00'}</span>
-          </div>
-          <div className="mt-2 flex items-baseline justify-between border-t border-line pt-2 text-deep-blue">
-            <span className="text-sm font-semibold tracking-wide uppercase">Total</span>
-            <span className="text-2xl font-semibold tabular-nums">
-              {maskCurrency(String(total)) || 'R$ 0,00'}
-            </span>
-          </div>
-        </div>
-      </Section>
-
-      {errors.general && (
-        <Alert severity="error" role="alert">
-          {errors.general}
-        </Alert>
-      )}
-
-      <div className="flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <Button
-          variant="outlined"
-          size="large"
-          onClick={onClose}
-          disabled={disabled}
-          sx={{ textTransform: 'none', fontWeight: 600 }}
-        >
+      <div className="flex flex-col-reverse gap-3 border-t border-line bg-surface px-4 py-3.5 sm:flex-row sm:justify-end sm:px-6 lg:px-8">
+        <Button variant="outlined" size="large" onClick={onClose} disabled={disabled}>
           Cancelar
         </Button>
 
@@ -379,10 +396,9 @@ function BudgetForm({ onClose }: BudgetFormProps) {
           size="large"
           loading={disabled}
           loadingPosition="start"
-          startIcon={<PictureAsPdfIcon />}
-          sx={{ textTransform: 'none', fontWeight: 600 }}
+          startIcon={<FileDownloadOutlinedIcon />}
         >
-          {disabled ? 'Gerando PDF...' : 'PDF'}
+          {disabled ? 'Gerando PDF...' : 'Gerar PDF'}
         </Button>
       </div>
     </form>

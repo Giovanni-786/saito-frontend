@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import type { ReactElement } from 'react'
 import type { DocumentProps } from '@react-pdf/renderer'
-import { downloadBlob } from '../../utils/downloadBlob'
+import { saveBlob } from '../../utils/download'
 import { today } from '../../utils/today'
 import type { ReportFormValues } from './reportValues'
 
@@ -28,5 +28,5 @@ export async function generateReportPdf(values: ReportFormValues) {
   }) as ReactElement<DocumentProps>
   const blob = await pdf(reportDocument).toBlob()
 
-  downloadBlob(blob, `laudo-${values.plate}-${issuedAt}.pdf`)
+  saveBlob(blob, `laudo-${values.plate}-${issuedAt}.pdf`)
 }

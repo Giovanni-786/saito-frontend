@@ -1,75 +1,70 @@
-import type { ReactElement, Ref } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
-import Dialog from '@mui/material/Dialog'
-import AppBar from '@mui/material/AppBar'
-import Toolbar from '@mui/material/Toolbar'
+import Drawer from '@mui/material/Drawer'
 import IconButton from '@mui/material/IconButton'
-import Typography from '@mui/material/Typography'
-import Slide from '@mui/material/Slide'
-import CloseIcon from '@mui/icons-material/Close'
-import type { TransitionProps } from '@mui/material/transitions'
+import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import { closeOrderModalAtom, orderModalAtom } from '../../store'
 import EditOrderForm from './EditOrderForm'
 import NewOrderForm from './NewOrderForm'
 
-type TransitionSlotProps = TransitionProps & {
-  children: ReactElement<unknown>
-  ref?: Ref<unknown>
-}
+/** Largura do painel no desktop. No mobile ele ocupa a tela inteira. */
+const DRAWER_WIDTH = 560
 
 /**
- * Entrada deslizando de baixo para cima.
- * No React 19 a `ref` chega como prop comum, então não precisa do `forwardRef`
- * que aparece no exemplo da documentação do MUI.
- */
-function SlideUpTransition(props: TransitionSlotProps) {
-  return <Slide direction="up" {...props} />
-}
-
-/**
- * Modal fullscreen de atendimento: cadastro ou edição, conforme o `orderId`.
+ * Painel lateral de atendimento: cadastro ou edição, conforme o `orderId`.
+ * Abre pela direita sobre a listagem, que continua à vista ao fundo.
  *
- * Não recebe props: lê o estado do `orderModalAtom`. A Sidebar abre para cadastro
- * (`openNewOrderModalAtom`) e o grid abre para edição (`openEditOrderModalAtom`).
+ * Não recebe props: lê o estado do `orderModalAtom`. O cabeçalho da página abre
+ * para cadastro (`openNewOrderModalAtom`) e o grid abre para edição
+ * (`openEditOrderModalAtom`).
  */
 function ModalNewOrder() {
   const { open, orderId } = useAtomValue(orderModalAtom)
   const close = useSetAtom(closeOrderModalAtom)
 
+  const isEdit = orderId !== null
+
   return (
-    <Dialog
-      fullScreen
+    <Drawer
+      anchor="right"
       open={open}
       onClose={close}
-      slots={{ transition: SlideUpTransition }}
-      aria-labelledby="modal-new-order-title"
+      slotProps={{
+        paper: {
+          role: 'dialog',
+          'aria-modal': true,
+          'aria-labelledby': 'modal-new-order-title',
+          sx: {
+            width: { xs: '100%', sm: DRAWER_WIDTH },
+            boxShadow: '-12px 0 40px rgba(15, 42, 84, 0.18)',
+          },
+        },
+      }}
     >
-      <AppBar sx={{ position: 'relative' }} className="bg-deep-blue!">
-        <Toolbar>
-          <IconButton edge="start" color="inherit" onClick={close} aria-label="Fechar">
-            <CloseIcon />
+      <div className="flex h-full flex-col">
+        <div className="flex items-start justify-between gap-4 border-b border-line px-5 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5">
+          <div className="flex flex-col gap-1">
+            <h2 id="modal-new-order-title" className="text-xl font-semibold tracking-tight">
+              {isEdit ? 'Editar atendimento' : 'Novo atendimento'}
+            </h2>
+            <p className="text-sm text-content-muted">
+              {isEdit
+                ? `Atendimento #${orderId}. Altere os campos e salve.`
+                : 'Preencha os dados do serviço realizado.'}
+            </p>
+          </div>
+          <IconButton onClick={close} aria-label="Fechar" sx={{ color: 'text.secondary', mr: -1 }}>
+            <CloseRoundedIcon />
           </IconButton>
-          <Typography
-            id="modal-new-order-title"
-            sx={{ ml: 2, flex: 1 }}
-            variant="h6"
-            component="h2"
-          >
-            {orderId === null ? 'Novo atendimento' : 'Editar atendimento'}
-          </Typography>
-        </Toolbar>
-      </AppBar>
+        </div>
 
-      {/* Coluna flex + my-auto no form: centraliza quando cabe e rola quando não cabe. */}
-      <div className="flex flex-1 flex-col overflow-y-auto bg-surface-muted px-4 py-8 sm:px-6">
-        {orderId === null ? (
-          <NewOrderForm onClose={close} />
-        ) : (
+        {isEdit ? (
           // key: trocar de atendimento remonta o form com os dados do novo.
           <EditOrderForm key={orderId} orderId={orderId} onClose={close} />
+        ) : (
+          <NewOrderForm onClose={close} />
         )}
       </div>
-    </Dialog>
+    </Drawer>
   )
 }
 

@@ -20,6 +20,23 @@ export const authTokenAtom = atomWithStorage<string | null>(TOKEN_STORAGE_KEY, n
 /** Derivado só-leitura: quem só quer saber "estou logado?" usa este. */
 export const isAuthenticatedAtom = atom((get) => get(authTokenAtom) !== null)
 
+/**
+ * E-mail do usuário logado, lido do `sub` do JWT. Só para exibição na Sidebar:
+ * quem valida o token é o backend. Token ilegível = null, e a tela usa um texto padrão.
+ */
+export const userEmailAtom = atom((get) => readJwtSubject(get(authTokenAtom)))
+
+function readJwtSubject(token: string | null) {
+  if (!token) return null
+  try {
+    const payload = token.split('.')[1].replace(/-/g, '+').replace(/_/g, '/')
+    const { sub } = JSON.parse(atob(payload)) as { sub?: unknown }
+    return typeof sub === 'string' ? sub : null
+  } catch {
+    return null
+  }
+}
+
 /** Guarda o token recebido do /auth/login. */
 export const signInAtom = atom(null, (_get, set, token: string) => {
   set(authTokenAtom, token)

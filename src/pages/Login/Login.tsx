@@ -10,6 +10,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { login } from '../../services/auth'
 import { signInAtom } from '../../store'
 import { ApiError } from '../../utils/api'
+import Brand from '../../components/Brand/Brand'
 
 /** Para onde mandar o usuário depois do login quando não veio de outra página. */
 const DEFAULT_REDIRECT = '/'
@@ -22,7 +23,7 @@ const DEFAULT_REDIRECT = '/'
  */
 function Login() {
   const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
+  const [password, setPassword] = useState('')
 
   const signIn = useSetAtom(signInAtom)
   const navigate = useNavigate()
@@ -42,7 +43,7 @@ function Login() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    mutation.mutate({ email: email.trim(), senha })
+    mutation.mutate({ email: email.trim(), senha: password })
   }
 
   const errorMessage =
@@ -53,11 +54,12 @@ function Login() {
         : null
 
   return (
-    <div className="flex min-h-dvh flex-col items-center justify-center bg-surface-muted px-4 py-12">
-      <main className="w-full max-w-sm rounded-2xl border border-line bg-surface p-8 shadow-sm">
-        <div className="mb-8 text-center">
-          <h1 className="text-2xl font-semibold tracking-tight text-deep-blue">Saito Oficina</h1>
-          <p className="mt-1 text-sm text-content-muted">Entre para acessar os atendimentos.</p>
+    <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-canvas px-4 py-12">
+      <Brand withSubtitle />
+      <main className="w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-[0_1px_2px_rgba(20,23,26,0.04)] sm:p-8">
+        <div className="mb-6">
+          <h1 className="text-xl font-semibold tracking-tight">Entrar</h1>
+          <p className="mt-1 text-sm text-content-muted">Acesse com seu e-mail e senha.</p>
         </div>
 
         {/* noValidate: quem valida e escreve as mensagens é o app, não o navegador. */}
@@ -77,8 +79,8 @@ function Login() {
           <TextField
             label="Senha"
             type="password"
-            value={senha}
-            onChange={(event) => setSenha(event.target.value)}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
             autoComplete="current-password"
             required
             fullWidth
@@ -101,7 +103,7 @@ function Login() {
             startIcon={
               mutation.isPending ? <CircularProgress size={18} color="inherit" /> : undefined
             }
-            sx={{ mt: 1, textTransform: 'none', fontWeight: 600 }}
+            sx={{ mt: 1 }}
           >
             {mutation.isPending ? 'Entrando...' : 'Entrar'}
           </Button>

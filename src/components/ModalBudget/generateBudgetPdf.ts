@@ -1,7 +1,7 @@
 import { createElement } from 'react'
 import type { ReactElement } from 'react'
 import type { DocumentProps } from '@react-pdf/renderer'
-import { downloadBlob } from '../../utils/downloadBlob'
+import { saveBlob } from '../../utils/download'
 import { today } from '../../utils/today'
 import type { BudgetFormValues } from './budgetValues'
 
@@ -29,7 +29,7 @@ export async function generateBudgetPdf(values: BudgetFormValues) {
 
   // Sem placa (comum em orçamento), o arquivo leva o nome do cliente.
   const reference = values.plate || slugify(values.customerName)
-  downloadBlob(blob, `orcamento-${reference}-${issuedAt}.pdf`)
+  saveBlob(blob, `orcamento-${reference}-${issuedAt}.pdf`)
 }
 
 /** "João da Silva" -> "joao-da-silva", seguro para nome de arquivo. */

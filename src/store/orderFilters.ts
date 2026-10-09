@@ -8,8 +8,8 @@ import { atom } from 'jotai'
 export const ordersSearchAtom = atom('')
 
 /** Aplica uma busca nova. Espaços nas pontas não contam como filtro. */
-export const applyOrdersSearchAtom = atom(null, (_get, set, busca: string) => {
-  set(ordersSearchAtom, busca.trim())
+export const applyOrdersSearchAtom = atom(null, (_get, set, search: string) => {
+  set(ordersSearchAtom, search.trim())
 })
 
 export const clearOrdersSearchAtom = atom(null, (_get, set) => {

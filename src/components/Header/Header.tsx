@@ -1,30 +1,23 @@
 import IconButton from '@mui/material/IconButton'
 import MenuIcon from '@mui/icons-material/Menu'
+import Brand from '../Brand/Brand'
 
 type HeaderProps = {
-  /** Abre a Sidebar no mobile. No desktop ela já fica visível e o botão some. */
+  /** Abre a Sidebar em gaveta. */
   onMenuClick: () => void
 }
 
 /**
- * Header global da aplicação: só a marca e, no mobile, o botão do menu.
- * Renderizado uma vez no Layout, acima de qualquer conteúdo de página.
- * As ações (Novo atendimento, Orçamento, Laudo seguradora e Sair) ficam na Sidebar.
+ * Barra superior só do mobile: botão do menu e a marca. No desktop a marca
+ * fica no topo da Sidebar e as ações de cada tela, no cabeçalho da página.
  */
 function Header({ onMenuClick }: HeaderProps) {
   return (
-    <header className="bg-deep-blue">
-      <div className="flex h-16 w-full items-center gap-2 px-4 sm:px-6">
-        <IconButton
-          edge="start"
-          onClick={onMenuClick}
-          aria-label="Abrir menu"
-          sx={{ color: 'common.white', display: { md: 'none' } }}
-        >
-          <MenuIcon />
-        </IconButton>
-        <span className="text-lg font-semibold tracking-tight text-white">Saito Oficina</span>
-      </div>
+    <header className="sticky top-0 z-10 flex h-16 items-center gap-2 border-b border-line bg-surface/95 px-2 backdrop-blur md:hidden">
+      <IconButton onClick={onMenuClick} aria-label="Abrir menu" sx={{ color: 'text.primary' }}>
+        <MenuIcon />
+      </IconButton>
+      <Brand />
     </header>
   )
 }

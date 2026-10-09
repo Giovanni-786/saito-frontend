@@ -5,15 +5,24 @@ import { toast } from 'sonner'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
-import { serviceCreate, serviceUpdate } from '../../services/atendimentos'
-import type { Atendimento, NovoAtendimento } from '../../services/atendimentos'
+import {
+  serviceCreate,
+  serviceDeleteAttachment,
+  serviceDownloadAttachment,
+  serviceUpdate,
+} from '../../services/orders'
+import type { Attachment, NewOrder, Order } from '../../services/orders'
 import { maskCurrency, maskInteger, maskPhone, normalizePlate, onlyDigits } from '../../utils/masks'
-import { fromAtendimento, initialValues, toPayload, validate } from './newOrderValues'
+import { fromOrder, initialValues, toPayload, validate } from './newOrderValues'
 import type { NewOrderFormValues } from './newOrderValues'
+import { saveBlob } from '../../utils/download'
+import AttachmentsField from './AttachmentsField'
 
 type NewOrderFormProps = {
   /** Atendimento a editar. Sem ele, o formulário cadastra um novo. */
-  order?: Atendimento
+  order?: Order
+  /** Anexos já salvos do atendimento em edição. */
+  attachments?: Attachment[]
   /** Chamado ao cancelar e depois de salvar com sucesso. */
   onClose: () => void
 }
@@ -22,13 +31,17 @@ type NewOrderFormProps = {
  * Formulário de atendimento: cadastra (POST /atendimentos) ou, recebendo
  * `order`, edita (PUT /atendimentos/{id}) com os campos já preenchidos.
  *
- * O estado vive aqui dentro: o Dialog desmonta o conteúdo ao fechar, então
+ * O estado vive aqui dentro: o Drawer desmonta o conteúdo ao fechar, então
  * cada abertura começa com o formulário limpo, sem reset manual.
  */
-function NewOrderForm({ order, onClose }: NewOrderFormProps) {
+function NewOrderForm({ order, attachments = [], onClose }: NewOrderFormProps) {
   const isEdit = order !== undefined
 
-  const [values, setValues] = useState(() => (order ? fromAtendimento(order) : initialValues()))
+  const [values, setValues] = useState(() => (order ? fromOrder(order) : initialValues()))
+  /** Arquivos novos, ainda só no navegador. */
+  const [files, setFiles] = useState<File[]>([])
+  /** Anexos salvos que o usuário não removeu. */
+  const [keptAttachments, setKeptAttachments] = useState(attachments)
 
   /** Erros só aparecem depois da primeira tentativa de salvar, não enquanto digita. */
   const [submitted, setSubmitted] = useState(false)
@@ -37,11 +50,22 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: (body: NovoAtendimento) =>
-      order ? serviceUpdate(order.id, body) : serviceCreate(body),
+    mutationFn: async (body: NewOrder) => {
+      if (!order) return serviceCreate(body, files)
+
+      // Sem nenhum anexo salvo restante, a parte `arquivos` vai como null e o backend
+      // limpa tudo de uma vez. Se sobrou algum, remove só os excluídos, um a um.
+      const clearAll = keptAttachments.length === 0
+      const saved = await serviceUpdate(order.id, body, files, clearAll)
+      if (!clearAll) {
+        const removed = attachments.filter((a) => !keptAttachments.some((m) => m.id === a.id))
+        await Promise.all(removed.map((a) => serviceDeleteAttachment(order.id, a.id)))
+      }
+      return saved
+    },
     onSuccess: () => {
       // A listagem (e o detalhe, na edição) mudou: refaz tudo que está em cache.
-      void queryClient.invalidateQueries({ queryKey: ['atendimentos'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
       toast.success(
         isEdit ? 'Atendimento atualizado com sucesso.' : 'Atendimento criado com sucesso.',
       )
@@ -56,6 +80,15 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
       )
     },
   })
+
+  async function downloadAttachment(attachment: Attachment) {
+    if (!order) return
+    try {
+      saveBlob(await serviceDownloadAttachment(order.id, attachment.id), attachment.nome)
+    } catch {
+      toast.error(`Não foi possível baixar ${attachment.nome}, tente novamente.`)
+    }
+  }
 
   function setField(field: keyof NewOrderFormValues, value: string) {
     setValues((current) => ({ ...current, [field]: value }))
@@ -72,142 +105,140 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
 
   return (
     // noValidate: quem valida e escreve as mensagens é o app, não o navegador.
-    <form
-      onSubmit={handleSubmit}
-      noValidate
-      className="mx-auto my-auto w-full max-w-3xl rounded-2xl border border-line bg-surface p-6 shadow-sm sm:p-8"
-    >
-      <p className="mb-6 text-sm text-content-muted">
-        Preencha os dados do atendimento. Campos com * são obrigatórios.
-      </p>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-6">
+    // Corpo rola e o rodapé com as ações fica fixo embaixo do painel.
+    <form onSubmit={handleSubmit} noValidate className="flex min-h-0 flex-1 flex-col">
+      <div className="grid flex-1 grid-cols-1 content-start gap-4 overflow-y-auto px-5 py-6 sm:grid-cols-6 sm:px-6">
         <TextField
           label="Data"
           type="date"
-          value={values.data}
-          onChange={(event) => setField('data', event.target.value)}
-          error={!!errors.data}
-          helperText={errors.data}
+          value={values.date}
+          onChange={(event) => setField('date', event.target.value)}
+          error={!!errors.date}
+          helperText={errors.date}
           required
           disabled={disabled}
           slotProps={{ inputLabel: { shrink: true } }}
-          className="md:col-span-2"
+          className="sm:col-span-2"
         />
 
         <TextField
           label="Cliente"
-          value={values.cliente}
-          onChange={(event) => setField('cliente', event.target.value)}
-          error={!!errors.cliente}
-          helperText={errors.cliente}
+          value={values.customer}
+          onChange={(event) => setField('customer', event.target.value)}
+          error={!!errors.customer}
+          helperText={errors.customer}
           autoComplete="off"
           autoFocus
           required
           disabled={disabled}
-          className="md:col-span-4"
+          className="sm:col-span-4"
         />
 
         <TextField
           label="Telefone"
-          value={maskPhone(values.telefone)}
-          onChange={(event) => setField('telefone', onlyDigits(event.target.value).slice(0, 11))}
-          error={!!errors.telefone}
-          helperText={errors.telefone}
+          value={maskPhone(values.phone)}
+          onChange={(event) => setField('phone', onlyDigits(event.target.value).slice(0, 11))}
+          error={!!errors.phone}
+          helperText={errors.phone}
           placeholder="(14) 99999-9999"
           required
           disabled={disabled}
           slotProps={{ htmlInput: { inputMode: 'tel' } }}
-          className="md:col-span-2"
+          className="sm:col-span-2"
         />
 
         <TextField
           label="Veículo"
-          value={values.veiculo}
-          onChange={(event) => setField('veiculo', event.target.value)}
-          error={!!errors.veiculo}
-          helperText={errors.veiculo}
+          value={values.vehicle}
+          onChange={(event) => setField('vehicle', event.target.value)}
+          error={!!errors.vehicle}
+          helperText={errors.vehicle}
           placeholder="Honda Civic"
           required
           disabled={disabled}
-          className="md:col-span-2"
+          className="sm:col-span-4"
         />
 
         <TextField
           label="Placa"
-          value={values.placa}
-          onChange={(event) => setField('placa', normalizePlate(event.target.value))}
-          error={!!errors.placa}
-          helperText={errors.placa}
+          value={values.plate}
+          onChange={(event) => setField('plate', normalizePlate(event.target.value))}
+          error={!!errors.plate}
+          helperText={errors.plate}
           placeholder="ABC1234"
           required
           disabled={disabled}
           slotProps={{ htmlInput: { autoCapitalize: 'characters' } }}
-          className="md:col-span-2"
+          className="sm:col-span-2"
         />
 
         <TextField
           label="KM"
-          value={maskInteger(values.km)}
-          onChange={(event) => setField('km', onlyDigits(event.target.value).slice(0, 7))}
-          error={!!errors.km}
-          helperText={errors.km}
+          value={maskInteger(values.mileage)}
+          onChange={(event) => setField('mileage', onlyDigits(event.target.value).slice(0, 7))}
+          error={!!errors.mileage}
+          helperText={errors.mileage}
           placeholder="85.000"
           required
           disabled={disabled}
           slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-          className="md:col-span-3"
+          className="sm:col-span-2"
         />
 
         <TextField
           label="Valor"
-          value={maskCurrency(values.valor)}
+          value={maskCurrency(values.amount)}
           onChange={(event) =>
             // Number() tira zeros à esquerda: apagar até "R$ 0,00" esvazia o campo.
-            setField('valor', String(Number(onlyDigits(event.target.value).slice(0, 10)) || ''))
+            setField('amount', String(Number(onlyDigits(event.target.value).slice(0, 10)) || ''))
           }
-          error={!!errors.valor}
-          helperText={errors.valor}
+          error={!!errors.amount}
+          helperText={errors.amount}
           placeholder="R$ 0,00"
           required
           disabled={disabled}
           slotProps={{ htmlInput: { inputMode: 'numeric' } }}
-          className="md:col-span-3"
+          className="sm:col-span-2"
         />
 
         <TextField
           label="Serviços / peças"
-          value={values.servicosPecas}
-          onChange={(event) => setField('servicosPecas', event.target.value)}
-          error={!!errors.servicosPecas}
-          helperText={errors.servicosPecas}
+          value={values.servicesParts}
+          onChange={(event) => setField('servicesParts', event.target.value)}
+          error={!!errors.servicesParts}
+          helperText={errors.servicesParts}
           placeholder="Troca de óleo e filtro"
           required
           multiline
           minRows={3}
           disabled={disabled}
-          className="sm:col-span-2 md:col-span-6"
+          className="sm:col-span-6"
         />
 
         <TextField
           label="Observação"
-          value={values.observacao}
-          onChange={(event) => setField('observacao', event.target.value)}
+          value={values.notes}
+          onChange={(event) => setField('notes', event.target.value)}
           multiline
           minRows={2}
           disabled={disabled}
-          className="sm:col-span-2 md:col-span-6"
+          className="sm:col-span-6"
+        />
+
+        <AttachmentsField
+          existing={keptAttachments}
+          files={files}
+          onFilesChange={setFiles}
+          onRemoveExisting={(attachmentId) =>
+            setKeptAttachments((current) => current.filter((a) => a.id !== attachmentId))
+          }
+          onDownloadExisting={downloadAttachment}
+          disabled={disabled}
         />
       </div>
 
-      <div className="mt-6 flex flex-col-reverse gap-3 sm:flex-row sm:justify-end">
-        <Button
-          variant="outlined"
-          size="large"
-          onClick={onClose}
-          disabled={disabled}
-          sx={{ textTransform: 'none', fontWeight: 600 }}
-        >
+      <div className="flex flex-col-reverse gap-3 border-t border-line bg-surface-subtle px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+        <Button variant="outlined" size="large" onClick={onClose} disabled={disabled}>
           Cancelar
         </Button>
 
@@ -217,9 +248,8 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           size="large"
           disabled={disabled}
           startIcon={disabled ? <CircularProgress size={18} color="inherit" /> : undefined}
-          sx={{ textTransform: 'none', fontWeight: 600 }}
         >
-          {disabled ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Salvar atendimento'}
+          {disabled ? 'Salvando...' : isEdit ? 'Salvar alterações' : 'Cadastrar atendimento'}
         </Button>
       </div>
     </form>

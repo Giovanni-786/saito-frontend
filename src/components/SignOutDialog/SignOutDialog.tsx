@@ -40,7 +40,7 @@ function SignOutDialog() {
           <LogoutRoundedIcon className="text-saito-blue" sx={{ fontSize: 34 }} />
         </div>
 
-        <DialogTitle id="sign-out-title" className="p-0! text-deep-blue" sx={{ fontWeight: 600 }}>
+        <DialogTitle id="sign-out-title" className="p-0! text-content" sx={{ fontWeight: 600 }}>
           Sair do sistema?
         </DialogTitle>
 
@@ -50,21 +50,11 @@ function SignOutDialog() {
       </DialogContent>
 
       <DialogActions className="flex-col-reverse gap-3 px-6! pb-6! sm:flex-row">
-        <Button
-          variant="outlined"
-          onClick={close}
-          fullWidth
-          sx={{ textTransform: 'none', fontWeight: 600, m: '0 !important' }}
-        >
+        <Button variant="outlined" onClick={close} fullWidth sx={{ m: '0 !important' }}>
           Cancelar
         </Button>
 
-        <Button
-          variant="contained"
-          onClick={handleConfirm}
-          fullWidth
-          sx={{ textTransform: 'none', fontWeight: 600, m: '0 !important' }}
-        >
+        <Button variant="contained" onClick={handleConfirm} fullWidth sx={{ m: '0 !important' }}>
           Sair
         </Button>
       </DialogActions>
