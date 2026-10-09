@@ -46,9 +46,40 @@ export function serviceGet(id: number, signal?: AbortSignal) {
   return api.get<Atendimento>(`/atendimentos/${id}`, { signal })
 }
 
-/** Cadastra um atendimento e devolve o registro criado. Falhas chegam como ApiError. */
-export function serviceCreate(body: NovoAtendimento) {
-  return api.post<Atendimento, NovoAtendimento>('/atendimentos', body)
+/** Anexo de um atendimento (AnexoResponseDTO). `caminho` é interno do servidor. */
+export type Anexo = {
+  id: number
+  nome: string
+  /** Content-Type do arquivo (ex.: "image/jpeg"). */
+  tipo: string
+  caminho: string
+}
+
+/** Limite do backend (spring.servlet.multipart.max-request-size) para uma requisição. */
+export const ANEXOS_MAX_BYTES = 100 * 1024 * 1024
+
+/** Upload de até 100MB não cabe nos 30s padrão do cliente. */
+const UPLOAD_TIMEOUT_MS = 10 * 60_000
+
+/**
+ * Monta o multipart que o backend espera: parte `dados` com o JSON do
+ * atendimento e uma parte `arquivos` por arquivo. `apagarAnexos` manda
+ * `arquivos=null`, que remove os anexos atuais antes de gravar os novos.
+ */
+function toFormData(body: NovoAtendimento, arquivos: File[], apagarAnexos = false) {
+  const form = new FormData()
+  // Blob com application/json: o @RequestPart("dados") só desserializa assim.
+  form.append('dados', new Blob([JSON.stringify(body)], { type: 'application/json' }))
+  if (apagarAnexos) form.append('arquivos', 'null')
+  for (const arquivo of arquivos) form.append('arquivos', arquivo)
+  return form
+}
+
+/** Cadastra um atendimento com seus anexos e devolve o registro criado. Falhas chegam como ApiError. */
+export function serviceCreate(body: NovoAtendimento, arquivos: File[] = []) {
+  return api.post<Atendimento, FormData>('/atendimentos', toFormData(body, arquivos), {
+    timeout: UPLOAD_TIMEOUT_MS,
+  })
 }
 
 /** Exclui um atendimento. Falhas chegam como ApiError. */
@@ -56,9 +87,39 @@ export function serviceDelete(id: number) {
   return api.delete(`/atendimentos/${id}`)
 }
 
-/** Atualiza um atendimento e devolve o registro salvo. Falhas chegam como ApiError. */
-export function serviceUpdate(id: number, body: NovoAtendimento) {
-  return api.put<Atendimento, NovoAtendimento>(`/atendimentos/${id}`, body)
+/**
+ * Atualiza um atendimento e devolve o registro salvo. `arquivos` são somados aos
+ * anexos atuais; com `apagarAnexos` os atuais são removidos antes. Falhas chegam como ApiError.
+ */
+export function serviceUpdate(
+  id: number,
+  body: NovoAtendimento,
+  arquivos: File[] = [],
+  apagarAnexos = false,
+) {
+  return api.put<Atendimento, FormData>(
+    `/atendimentos/${id}`,
+    toFormData(body, arquivos, apagarAnexos),
+    { timeout: UPLOAD_TIMEOUT_MS },
+  )
+}
+
+/** Lista os anexos de um atendimento. Falhas chegam como ApiError. */
+export function serviceListAnexos(id: number, signal?: AbortSignal) {
+  return api.get<Anexo[]>(`/atendimentos/${id}/anexos`, { signal })
+}
+
+/** Baixa o conteúdo de um anexo. Falhas chegam como ApiError. */
+export function serviceDownloadAnexo(id: number, anexoId: number) {
+  return api.get<Blob>(`/atendimentos/${id}/anexos/${anexoId}`, {
+    responseType: 'blob',
+    timeout: UPLOAD_TIMEOUT_MS,
+  })
+}
+
+/** Exclui um único anexo do atendimento. Falhas chegam como ApiError. */
+export function serviceDeleteAnexo(id: number, anexoId: number) {
+  return api.delete(`/atendimentos/${id}/anexos/${anexoId}`)
 }
 
 /**

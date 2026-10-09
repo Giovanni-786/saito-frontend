@@ -5,15 +5,24 @@ import { toast } from 'sonner'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
-import { serviceCreate, serviceUpdate } from '../../services/atendimentos'
-import type { Atendimento, NovoAtendimento } from '../../services/atendimentos'
+import {
+  serviceCreate,
+  serviceDeleteAnexo,
+  serviceDownloadAnexo,
+  serviceUpdate,
+} from '../../services/atendimentos'
+import type { Anexo, Atendimento, NovoAtendimento } from '../../services/atendimentos'
 import { maskCurrency, maskInteger, maskPhone, normalizePlate, onlyDigits } from '../../utils/masks'
 import { fromAtendimento, initialValues, toPayload, validate } from './newOrderValues'
 import type { NewOrderFormValues } from './newOrderValues'
+import { saveBlob } from '../../utils/download'
+import AttachmentsField from './AttachmentsField'
 
 type NewOrderFormProps = {
   /** Atendimento a editar. Sem ele, o formulário cadastra um novo. */
   order?: Atendimento
+  /** Anexos já salvos do atendimento em edição. */
+  anexos?: Anexo[]
   /** Chamado ao cancelar e depois de salvar com sucesso. */
   onClose: () => void
 }
@@ -25,10 +34,14 @@ type NewOrderFormProps = {
  * O estado vive aqui dentro: o Drawer desmonta o conteúdo ao fechar, então
  * cada abertura começa com o formulário limpo, sem reset manual.
  */
-function NewOrderForm({ order, onClose }: NewOrderFormProps) {
+function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
   const isEdit = order !== undefined
 
   const [values, setValues] = useState(() => (order ? fromAtendimento(order) : initialValues()))
+  /** Arquivos novos, ainda só no navegador. */
+  const [arquivos, setArquivos] = useState<File[]>([])
+  /** Anexos salvos que o usuário não removeu. */
+  const [anexosMantidos, setAnexosMantidos] = useState(anexos)
 
   /** Erros só aparecem depois da primeira tentativa de salvar, não enquanto digita. */
   const [submitted, setSubmitted] = useState(false)
@@ -37,8 +50,19 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: (body: NovoAtendimento) =>
-      order ? serviceUpdate(order.id, body) : serviceCreate(body),
+    mutationFn: async (body: NovoAtendimento) => {
+      if (!order) return serviceCreate(body, arquivos)
+
+      // Sem nenhum anexo salvo restante, `arquivos` vai como null e o backend
+      // limpa tudo de uma vez. Se sobrou algum, remove só os excluídos, um a um.
+      const apagarTodos = anexosMantidos.length === 0
+      const salvo = await serviceUpdate(order.id, body, arquivos, apagarTodos)
+      if (!apagarTodos) {
+        const removidos = anexos.filter((a) => !anexosMantidos.some((m) => m.id === a.id))
+        await Promise.all(removidos.map((a) => serviceDeleteAnexo(order.id, a.id)))
+      }
+      return salvo
+    },
     onSuccess: () => {
       // A listagem (e o detalhe, na edição) mudou: refaz tudo que está em cache.
       void queryClient.invalidateQueries({ queryKey: ['atendimentos'] })
@@ -56,6 +80,15 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
       )
     },
   })
+
+  async function downloadAnexo(anexo: Anexo) {
+    if (!order) return
+    try {
+      saveBlob(await serviceDownloadAnexo(order.id, anexo.id), anexo.nome)
+    } catch {
+      toast.error(`Não foi possível baixar ${anexo.nome}, tente novamente.`)
+    }
+  }
 
   function setField(field: keyof NewOrderFormValues, value: string) {
     setValues((current) => ({ ...current, [field]: value }))
@@ -190,6 +223,17 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
           minRows={2}
           disabled={disabled}
           className="sm:col-span-6"
+        />
+
+        <AttachmentsField
+          existing={anexosMantidos}
+          files={arquivos}
+          onFilesChange={setArquivos}
+          onRemoveExisting={(anexoId) =>
+            setAnexosMantidos((current) => current.filter((a) => a.id !== anexoId))
+          }
+          onDownloadExisting={downloadAnexo}
+          disabled={disabled}
         />
       </div>
 
