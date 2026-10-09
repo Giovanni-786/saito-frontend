@@ -9,7 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import WarningAmberRoundedIcon from '@mui/icons-material/WarningAmberRounded'
-import { serviceDelete } from '../../services/atendimentos'
+import { serviceDelete } from '../../services/orders'
 import { closeDeleteOrderDialogAtom, deleteOrderDialogAtom } from '../../store'
 
 /**
@@ -26,7 +26,7 @@ function DeleteOrderDialog() {
   const mutation = useMutation({
     mutationFn: serviceDelete,
     onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ['atendimentos'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
       toast.success('Atendimento excluído com sucesso.')
       close()
     },

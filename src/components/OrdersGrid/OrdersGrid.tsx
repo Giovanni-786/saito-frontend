@@ -7,7 +7,7 @@ import type { Theme } from '@mui/material/styles'
 import { DataGrid } from '@mui/x-data-grid'
 import type { GridPaginationModel, GridSortModel } from '@mui/x-data-grid'
 import { ptBR } from '@mui/x-data-grid/locales'
-import { serviceList } from '../../services/atendimentos'
+import { serviceList } from '../../services/orders'
 import { openEditOrderModalAtom, ordersSearchAtom } from '../../store'
 import { ApiError } from '../../utils/api'
 import OrdersFilters from '../OrdersFilters/OrdersFilters'
@@ -31,7 +31,7 @@ const ROW_BORDER = '#eef1f5'
  * troca de página, busca ou ordenação.
  */
 function OrdersGrid() {
-  const busca = useAtomValue(ordersSearchAtom)
+  const search = useAtomValue(ordersSearchAtom)
   const openEdit = useSetAtom(openEditOrderModalAtom)
   const isMobile = useMediaQuery((theme: Theme) => theme.breakpoints.down('md'), { noSsr: true })
 
@@ -45,9 +45,9 @@ function OrdersGrid() {
    * pode nem existir no resultado novo. Ajuste feito durante o render (padrão
    * do React para derivar estado de uma mudança), sem useEffect.
    */
-  const [lastBusca, setLastBusca] = useState(busca)
-  if (busca !== lastBusca) {
-    setLastBusca(busca)
+  const [lastSearch, setLastSearch] = useState(search)
+  if (search !== lastSearch) {
+    setLastSearch(search)
     setPaginationModel((current) => ({ ...current, page: 0 }))
   }
 
@@ -65,12 +65,12 @@ function OrdersGrid() {
   const sort = sortItem?.sort ? `${sortItem.field},${sortItem.sort}` : undefined
 
   const query = useQuery({
-    queryKey: ['atendimentos', busca, sort, paginationModel],
+    queryKey: ['orders', search, sort, paginationModel],
     queryFn: ({ signal }) =>
       serviceList(
         {
           // Sem busca/ordem o parâmetro nem vai na URL: o axios descarta `undefined`.
-          busca: busca || undefined,
+          busca: search || undefined,
           page: paginationModel.page,
           size: paginationModel.pageSize,
           sort,
@@ -95,7 +95,7 @@ function OrdersGrid() {
   const countLabel =
     total === undefined
       ? null
-      : busca
+      : search
         ? `${total} ${total === 1 ? 'resultado' : 'resultados'}`
         : `${total} ${total === 1 ? 'atendimento' : 'atendimentos'}`
 
