@@ -3,7 +3,7 @@ import IconButton from '@mui/material/IconButton'
 import Skeleton from '@mui/material/Skeleton'
 import ChevronLeftRoundedIcon from '@mui/icons-material/ChevronLeftRounded'
 import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
-import type { Atendimento } from '../../services/atendimentos'
+import type { Order } from '../../services/orders'
 import { openEditOrderModalAtom } from '../../store'
 import { formatDate } from '../../utils/formatDate'
 import { currencyFormatter } from './columns'
@@ -12,7 +12,7 @@ import OrdersEmptyState from './OrdersEmptyState'
 import PlateChip from './PlateChip'
 
 type OrdersCardListProps = {
-  rows: Atendimento[]
+  rows: Order[]
   /** Primeira carga, ainda sem nenhuma linha para mostrar. */
   loading: boolean
   page: number

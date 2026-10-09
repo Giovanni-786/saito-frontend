@@ -7,22 +7,22 @@ import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import {
   serviceCreate,
-  serviceDeleteAnexo,
-  serviceDownloadAnexo,
+  serviceDeleteAttachment,
+  serviceDownloadAttachment,
   serviceUpdate,
-} from '../../services/atendimentos'
-import type { Anexo, Atendimento, NovoAtendimento } from '../../services/atendimentos'
+} from '../../services/orders'
+import type { Attachment, NewOrder, Order } from '../../services/orders'
 import { maskCurrency, maskInteger, maskPhone, normalizePlate, onlyDigits } from '../../utils/masks'
-import { fromAtendimento, initialValues, toPayload, validate } from './newOrderValues'
+import { fromOrder, initialValues, toPayload, validate } from './newOrderValues'
 import type { NewOrderFormValues } from './newOrderValues'
 import { saveBlob } from '../../utils/download'
 import AttachmentsField from './AttachmentsField'
 
 type NewOrderFormProps = {
   /** Atendimento a editar. Sem ele, o formulário cadastra um novo. */
-  order?: Atendimento
+  order?: Order
   /** Anexos já salvos do atendimento em edição. */
-  anexos?: Anexo[]
+  attachments?: Attachment[]
   /** Chamado ao cancelar e depois de salvar com sucesso. */
   onClose: () => void
 }
@@ -34,14 +34,14 @@ type NewOrderFormProps = {
  * O estado vive aqui dentro: o Drawer desmonta o conteúdo ao fechar, então
  * cada abertura começa com o formulário limpo, sem reset manual.
  */
-function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
+function NewOrderForm({ order, attachments = [], onClose }: NewOrderFormProps) {
   const isEdit = order !== undefined
 
-  const [values, setValues] = useState(() => (order ? fromAtendimento(order) : initialValues()))
+  const [values, setValues] = useState(() => (order ? fromOrder(order) : initialValues()))
   /** Arquivos novos, ainda só no navegador. */
-  const [arquivos, setArquivos] = useState<File[]>([])
+  const [files, setFiles] = useState<File[]>([])
   /** Anexos salvos que o usuário não removeu. */
-  const [anexosMantidos, setAnexosMantidos] = useState(anexos)
+  const [keptAttachments, setKeptAttachments] = useState(attachments)
 
   /** Erros só aparecem depois da primeira tentativa de salvar, não enquanto digita. */
   const [submitted, setSubmitted] = useState(false)
@@ -50,22 +50,22 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: async (body: NovoAtendimento) => {
-      if (!order) return serviceCreate(body, arquivos)
+    mutationFn: async (body: NewOrder) => {
+      if (!order) return serviceCreate(body, files)
 
-      // Sem nenhum anexo salvo restante, `arquivos` vai como null e o backend
+      // Sem nenhum anexo salvo restante, a parte `arquivos` vai como null e o backend
       // limpa tudo de uma vez. Se sobrou algum, remove só os excluídos, um a um.
-      const apagarTodos = anexosMantidos.length === 0
-      const salvo = await serviceUpdate(order.id, body, arquivos, apagarTodos)
-      if (!apagarTodos) {
-        const removidos = anexos.filter((a) => !anexosMantidos.some((m) => m.id === a.id))
-        await Promise.all(removidos.map((a) => serviceDeleteAnexo(order.id, a.id)))
+      const clearAll = keptAttachments.length === 0
+      const saved = await serviceUpdate(order.id, body, files, clearAll)
+      if (!clearAll) {
+        const removed = attachments.filter((a) => !keptAttachments.some((m) => m.id === a.id))
+        await Promise.all(removed.map((a) => serviceDeleteAttachment(order.id, a.id)))
       }
-      return salvo
+      return saved
     },
     onSuccess: () => {
       // A listagem (e o detalhe, na edição) mudou: refaz tudo que está em cache.
-      void queryClient.invalidateQueries({ queryKey: ['atendimentos'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
       toast.success(
         isEdit ? 'Atendimento atualizado com sucesso.' : 'Atendimento criado com sucesso.',
       )
@@ -81,12 +81,12 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
     },
   })
 
-  async function downloadAnexo(anexo: Anexo) {
+  async function downloadAttachment(attachment: Attachment) {
     if (!order) return
     try {
-      saveBlob(await serviceDownloadAnexo(order.id, anexo.id), anexo.nome)
+      saveBlob(await serviceDownloadAttachment(order.id, attachment.id), attachment.nome)
     } catch {
-      toast.error(`Não foi possível baixar ${anexo.nome}, tente novamente.`)
+      toast.error(`Não foi possível baixar ${attachment.nome}, tente novamente.`)
     }
   }
 
@@ -111,10 +111,10 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
         <TextField
           label="Data"
           type="date"
-          value={values.data}
-          onChange={(event) => setField('data', event.target.value)}
-          error={!!errors.data}
-          helperText={errors.data}
+          value={values.date}
+          onChange={(event) => setField('date', event.target.value)}
+          error={!!errors.date}
+          helperText={errors.date}
           required
           disabled={disabled}
           slotProps={{ inputLabel: { shrink: true } }}
@@ -123,10 +123,10 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
 
         <TextField
           label="Cliente"
-          value={values.cliente}
-          onChange={(event) => setField('cliente', event.target.value)}
-          error={!!errors.cliente}
-          helperText={errors.cliente}
+          value={values.customer}
+          onChange={(event) => setField('customer', event.target.value)}
+          error={!!errors.customer}
+          helperText={errors.customer}
           autoComplete="off"
           autoFocus
           required
@@ -136,10 +136,10 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
 
         <TextField
           label="Telefone"
-          value={maskPhone(values.telefone)}
-          onChange={(event) => setField('telefone', onlyDigits(event.target.value).slice(0, 11))}
-          error={!!errors.telefone}
-          helperText={errors.telefone}
+          value={maskPhone(values.phone)}
+          onChange={(event) => setField('phone', onlyDigits(event.target.value).slice(0, 11))}
+          error={!!errors.phone}
+          helperText={errors.phone}
           placeholder="(14) 99999-9999"
           required
           disabled={disabled}
@@ -149,10 +149,10 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
 
         <TextField
           label="Veículo"
-          value={values.veiculo}
-          onChange={(event) => setField('veiculo', event.target.value)}
-          error={!!errors.veiculo}
-          helperText={errors.veiculo}
+          value={values.vehicle}
+          onChange={(event) => setField('vehicle', event.target.value)}
+          error={!!errors.vehicle}
+          helperText={errors.vehicle}
           placeholder="Honda Civic"
           required
           disabled={disabled}
@@ -161,10 +161,10 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
 
         <TextField
           label="Placa"
-          value={values.placa}
-          onChange={(event) => setField('placa', normalizePlate(event.target.value))}
-          error={!!errors.placa}
-          helperText={errors.placa}
+          value={values.plate}
+          onChange={(event) => setField('plate', normalizePlate(event.target.value))}
+          error={!!errors.plate}
+          helperText={errors.plate}
           placeholder="ABC1234"
           required
           disabled={disabled}
@@ -174,10 +174,10 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
 
         <TextField
           label="KM"
-          value={maskInteger(values.km)}
-          onChange={(event) => setField('km', onlyDigits(event.target.value).slice(0, 7))}
-          error={!!errors.km}
-          helperText={errors.km}
+          value={maskInteger(values.mileage)}
+          onChange={(event) => setField('mileage', onlyDigits(event.target.value).slice(0, 7))}
+          error={!!errors.mileage}
+          helperText={errors.mileage}
           placeholder="85.000"
           required
           disabled={disabled}
@@ -187,13 +187,13 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
 
         <TextField
           label="Valor"
-          value={maskCurrency(values.valor)}
+          value={maskCurrency(values.amount)}
           onChange={(event) =>
             // Number() tira zeros à esquerda: apagar até "R$ 0,00" esvazia o campo.
-            setField('valor', String(Number(onlyDigits(event.target.value).slice(0, 10)) || ''))
+            setField('amount', String(Number(onlyDigits(event.target.value).slice(0, 10)) || ''))
           }
-          error={!!errors.valor}
-          helperText={errors.valor}
+          error={!!errors.amount}
+          helperText={errors.amount}
           placeholder="R$ 0,00"
           required
           disabled={disabled}
@@ -203,10 +203,10 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
 
         <TextField
           label="Serviços / peças"
-          value={values.servicosPecas}
-          onChange={(event) => setField('servicosPecas', event.target.value)}
-          error={!!errors.servicosPecas}
-          helperText={errors.servicosPecas}
+          value={values.servicesParts}
+          onChange={(event) => setField('servicesParts', event.target.value)}
+          error={!!errors.servicesParts}
+          helperText={errors.servicesParts}
           placeholder="Troca de óleo e filtro"
           required
           multiline
@@ -217,8 +217,8 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
 
         <TextField
           label="Observação"
-          value={values.observacao}
-          onChange={(event) => setField('observacao', event.target.value)}
+          value={values.notes}
+          onChange={(event) => setField('notes', event.target.value)}
           multiline
           minRows={2}
           disabled={disabled}
@@ -226,13 +226,13 @@ function NewOrderForm({ order, anexos = [], onClose }: NewOrderFormProps) {
         />
 
         <AttachmentsField
-          existing={anexosMantidos}
-          files={arquivos}
-          onFilesChange={setArquivos}
-          onRemoveExisting={(anexoId) =>
-            setAnexosMantidos((current) => current.filter((a) => a.id !== anexoId))
+          existing={keptAttachments}
+          files={files}
+          onFilesChange={setFiles}
+          onRemoveExisting={(attachmentId) =>
+            setKeptAttachments((current) => current.filter((a) => a.id !== attachmentId))
           }
-          onDownloadExisting={downloadAnexo}
+          onDownloadExisting={downloadAttachment}
           disabled={disabled}
         />
       </div>

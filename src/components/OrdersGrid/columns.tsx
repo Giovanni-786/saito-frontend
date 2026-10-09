@@ -1,5 +1,5 @@
 import type { GridColDef } from '@mui/x-data-grid'
-import type { Atendimento } from '../../services/atendimentos'
+import type { Order } from '../../services/orders'
 import { formatDate } from '../../utils/formatDate'
 import { maskPhone, onlyDigits } from '../../utils/masks'
 import DeleteOrderButton from './DeleteOrderButton'
@@ -11,7 +11,7 @@ export const currencyFormatter = new Intl.NumberFormat('pt-BR', {
   currency: 'BRL',
 })
 
-export const columns: GridColDef<Atendimento>[] = [
+export const columns: GridColDef<Order>[] = [
   {
     field: 'data',
     headerName: 'Data',
@@ -70,7 +70,7 @@ export const columns: GridColDef<Atendimento>[] = [
     cellClassName: 'cell-strong',
   },
   {
-    field: 'acoes',
+    field: 'actions',
     headerName: 'Ações',
     // O título existe para leitores de tela; visualmente a coluna não tem cabeçalho.
     renderHeader: () => <span className="sr-only">Ações</span>,

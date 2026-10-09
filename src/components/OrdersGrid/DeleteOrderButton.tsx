@@ -3,11 +3,11 @@ import { useSetAtom } from 'jotai'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutlineRounded'
-import type { Atendimento } from '../../services/atendimentos'
+import type { Order } from '../../services/orders'
 import { openDeleteOrderDialogAtom } from '../../store'
 
 type DeleteOrderButtonProps = {
-  order: Atendimento
+  order: Order
 }
 
 /** Lixeira da linha: só abre a confirmação, quem exclui é a DeleteOrderDialog. */

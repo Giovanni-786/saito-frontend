@@ -1,7 +1,7 @@
 import { api } from '../utils/api'
 
 /** Item de GET /atendimentos. Os nomes vêm do AtendimentoResponseDTO do backend. */
-export type Atendimento = {
+export type Order = {
   id: number
   /** Data no formato ISO (AAAA-MM-DD), como o LocalDate do backend serializa. */
   data: string
@@ -16,7 +16,7 @@ export type Atendimento = {
 }
 
 /** Query string aceita por GET /atendimentos. `page` começa em 0. */
-export type ListarAtendimentosParams = {
+export type ListOrdersParams = {
   busca?: string
   page: number
   size: number
@@ -34,20 +34,20 @@ export type Page<T> = {
 }
 
 /** Corpo de POST /atendimentos: o atendimento sem o `id`, que o backend gera. */
-export type NovoAtendimento = Omit<Atendimento, 'id'>
+export type NewOrder = Omit<Order, 'id'>
 
 /** Lista os atendimentos com busca e paginação. Falhas chegam como ApiError. */
-export function serviceList(params: ListarAtendimentosParams, signal?: AbortSignal) {
-  return api.get<Page<Atendimento>>('/atendimentos', { params, signal })
+export function serviceList(params: ListOrdersParams, signal?: AbortSignal) {
+  return api.get<Page<Order>>('/atendimentos', { params, signal })
 }
 
 /** Busca um atendimento pelo id. Falhas chegam como ApiError. */
 export function serviceGet(id: number, signal?: AbortSignal) {
-  return api.get<Atendimento>(`/atendimentos/${id}`, { signal })
+  return api.get<Order>(`/atendimentos/${id}`, { signal })
 }
 
 /** Anexo de um atendimento (AnexoResponseDTO). `caminho` é interno do servidor. */
-export type Anexo = {
+export type Attachment = {
   id: number
   nome: string
   /** Content-Type do arquivo (ex.: "image/jpeg"). */
@@ -56,28 +56,28 @@ export type Anexo = {
 }
 
 /** Limite do backend (spring.servlet.multipart.max-request-size) para uma requisição. */
-export const ANEXOS_MAX_BYTES = 100 * 1024 * 1024
+export const ATTACHMENTS_MAX_BYTES = 100 * 1024 * 1024
 
 /** Upload de até 100MB não cabe nos 30s padrão do cliente. */
 const UPLOAD_TIMEOUT_MS = 10 * 60_000
 
 /**
  * Monta o multipart que o backend espera: parte `dados` com o JSON do
- * atendimento e uma parte `arquivos` por arquivo. `apagarAnexos` manda
+ * atendimento e uma parte `arquivos` por arquivo. `clearAttachments` manda
  * `arquivos=null`, que remove os anexos atuais antes de gravar os novos.
  */
-function toFormData(body: NovoAtendimento, arquivos: File[], apagarAnexos = false) {
+function toFormData(body: NewOrder, files: File[], clearAttachments = false) {
   const form = new FormData()
   // Blob com application/json: o @RequestPart("dados") só desserializa assim.
   form.append('dados', new Blob([JSON.stringify(body)], { type: 'application/json' }))
-  if (apagarAnexos) form.append('arquivos', 'null')
-  for (const arquivo of arquivos) form.append('arquivos', arquivo)
+  if (clearAttachments) form.append('arquivos', 'null')
+  for (const file of files) form.append('arquivos', file)
   return form
 }
 
 /** Cadastra um atendimento com seus anexos e devolve o registro criado. Falhas chegam como ApiError. */
-export function serviceCreate(body: NovoAtendimento, arquivos: File[] = []) {
-  return api.post<Atendimento, FormData>('/atendimentos', toFormData(body, arquivos), {
+export function serviceCreate(body: NewOrder, files: File[] = []) {
+  return api.post<Order, FormData>('/atendimentos', toFormData(body, files), {
     timeout: UPLOAD_TIMEOUT_MS,
   })
 }
@@ -88,53 +88,46 @@ export function serviceDelete(id: number) {
 }
 
 /**
- * Atualiza um atendimento e devolve o registro salvo. `arquivos` são somados aos
- * anexos atuais; com `apagarAnexos` os atuais são removidos antes. Falhas chegam como ApiError.
+ * Atualiza um atendimento e devolve o registro salvo. `files` são somados aos
+ * anexos atuais; com `clearAttachments` os atuais são removidos antes. Falhas chegam como ApiError.
  */
 export function serviceUpdate(
   id: number,
-  body: NovoAtendimento,
-  arquivos: File[] = [],
-  apagarAnexos = false,
+  body: NewOrder,
+  files: File[] = [],
+  clearAttachments = false,
 ) {
-  return api.put<Atendimento, FormData>(
+  return api.put<Order, FormData>(
     `/atendimentos/${id}`,
-    toFormData(body, arquivos, apagarAnexos),
+    toFormData(body, files, clearAttachments),
     { timeout: UPLOAD_TIMEOUT_MS },
   )
 }
 
 /** Lista os anexos de um atendimento. Falhas chegam como ApiError. */
-export function serviceListAnexos(id: number, signal?: AbortSignal) {
-  return api.get<Anexo[]>(`/atendimentos/${id}/anexos`, { signal })
+export function serviceListAttachments(id: number, signal?: AbortSignal) {
+  return api.get<Attachment[]>(`/atendimentos/${id}/anexos`, { signal })
 }
 
 /** Baixa o conteúdo de um anexo. Falhas chegam como ApiError. */
-export function serviceDownloadAnexo(id: number, anexoId: number) {
-  return api.get<Blob>(`/atendimentos/${id}/anexos/${anexoId}`, {
+export function serviceDownloadAttachment(id: number, attachmentId: number) {
+  return api.get<Blob>(`/atendimentos/${id}/anexos/${attachmentId}`, {
     responseType: 'blob',
     timeout: UPLOAD_TIMEOUT_MS,
   })
 }
 
 /** Exclui um único anexo do atendimento. Falhas chegam como ApiError. */
-export function serviceDeleteAnexo(id: number, anexoId: number) {
-  return api.delete(`/atendimentos/${id}/anexos/${anexoId}`)
+export function serviceDeleteAttachment(id: number, attachmentId: number) {
+  return api.delete(`/atendimentos/${id}/anexos/${attachmentId}`)
 }
 
-/**
- * Resposta de GET /atendimentos/resumo.
- *
- * A rota ainda não existe no backend: nome e campos são uma proposta. Quando
- * ela for criada, ajuste aqui conforme o DTO real e ligue o
- * SUMMARY_ENDPOINT_READY no OrdersSummary.
- */
-export type ResumoAtendimentos = {
-  totalAtendimentos: number
-  faturamentoTotal: number
+/** Resposta de GET /atendimentos/faturamento: soma do valor de todos os atendimentos. */
+export type Revenue = {
+  total: number
 }
 
-/** Totais de atendimentos e faturamento. Falhas chegam como ApiError. */
-export function serviceSummary(signal?: AbortSignal) {
-  return api.get<ResumoAtendimentos>('/atendimentos/resumo', { signal })
+/** Faturamento total dos atendimentos. Falhas chegam como ApiError. */
+export function serviceRevenue(signal?: AbortSignal) {
+  return api.get<Revenue>('/atendimentos/faturamento', { signal })
 }

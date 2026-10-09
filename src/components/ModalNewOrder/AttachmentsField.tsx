@@ -9,18 +9,18 @@ import ImageOutlinedIcon from '@mui/icons-material/ImageOutlined'
 import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined'
 import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined'
 import VideoFileOutlinedIcon from '@mui/icons-material/VideoFileOutlined'
-import { ANEXOS_MAX_BYTES } from '../../services/atendimentos'
-import type { Anexo } from '../../services/atendimentos'
+import { ATTACHMENTS_MAX_BYTES } from '../../services/orders'
+import type { Attachment } from '../../services/orders'
 
 type AttachmentsFieldProps = {
   /** Anexos já salvos no atendimento (só na edição). */
-  existing: Anexo[]
+  existing: Attachment[]
   /** Arquivos escolhidos agora, ainda não enviados. */
   files: File[]
   onFilesChange: (files: File[]) => void
-  onRemoveExisting: (anexoId: number) => void
+  onRemoveExisting: (attachmentId: number) => void
   /** Baixa um anexo salvo; a promessa marca o carregamento do botão. */
-  onDownloadExisting: (anexo: Anexo) => Promise<void>
+  onDownloadExisting: (attachment: Attachment) => Promise<void>
   disabled?: boolean
 }
 
@@ -69,9 +69,9 @@ function AttachmentsField({
     const added = selected.filter((file) => !known.has(fileKey(file)))
     const nextTotal = totalBytes + added.reduce((sum, file) => sum + file.size, 0)
 
-    if (nextTotal > ANEXOS_MAX_BYTES) {
+    if (nextTotal > ATTACHMENTS_MAX_BYTES) {
       setError(
-        `Os anexos passam de ${formatBytes(ANEXOS_MAX_BYTES)}. Remova algum ou escolha arquivos menores.`,
+        `Os anexos passam de ${formatBytes(ATTACHMENTS_MAX_BYTES)}. Remova algum ou escolha arquivos menores.`,
       )
       return
     }
@@ -91,12 +91,12 @@ function AttachmentsField({
     if (!disabled) addFiles(Array.from(event.dataTransfer.files))
   }
 
-  async function download(anexo: Anexo) {
-    setDownloading((current) => [...current, anexo.id])
+  async function download(attachment: Attachment) {
+    setDownloading((current) => [...current, attachment.id])
     try {
-      await onDownloadExisting(anexo)
+      await onDownloadExisting(attachment)
     } finally {
-      setDownloading((current) => current.filter((id) => id !== anexo.id))
+      setDownloading((current) => current.filter((id) => id !== attachment.id))
     }
   }
 
@@ -130,7 +130,7 @@ function AttachmentsField({
         <CloudUploadOutlinedIcon className="text-saito-blue" />
         <span className="text-sm font-medium">Adicionar fotos, vídeos ou documentos</span>
         <span className="text-xs text-content-subtle">
-          Clique ou arraste aqui. Até {formatBytes(ANEXOS_MAX_BYTES)} no total.
+          Clique ou arraste aqui. Até {formatBytes(ATTACHMENTS_MAX_BYTES)} no total.
         </span>
         <input
           id={inputId}
@@ -150,20 +150,23 @@ function AttachmentsField({
 
       {hasItems && (
         <ul className="flex flex-col divide-y divide-line rounded-lg border border-line">
-          {existing.map((anexo) => (
-            <li key={`anexo-${anexo.id}`} className="flex items-center gap-3 py-1 pr-1 pl-3">
+          {existing.map((attachment) => (
+            <li
+              key={`attachment-${attachment.id}`}
+              className="flex items-center gap-3 py-1 pr-1 pl-3"
+            >
               <span className="text-content-muted">
-                <FileIcon type={anexo.tipo} />
+                <FileIcon type={attachment.tipo} />
               </span>
-              <span className="min-w-0 flex-1 truncate text-sm">{anexo.nome}</span>
+              <span className="min-w-0 flex-1 truncate text-sm">{attachment.nome}</span>
               <span className="text-xs text-content-subtle">Salvo</span>
               <IconButton
                 size="small"
-                onClick={() => void download(anexo)}
-                disabled={downloading.includes(anexo.id)}
-                aria-label={`Baixar ${anexo.nome}`}
+                onClick={() => void download(attachment)}
+                disabled={downloading.includes(attachment.id)}
+                aria-label={`Baixar ${attachment.nome}`}
               >
-                {downloading.includes(anexo.id) ? (
+                {downloading.includes(attachment.id) ? (
                   <CircularProgress size={16} />
                 ) : (
                   <DownloadRoundedIcon fontSize="small" />
@@ -171,9 +174,9 @@ function AttachmentsField({
               </IconButton>
               <IconButton
                 size="small"
-                onClick={() => onRemoveExisting(anexo.id)}
+                onClick={() => onRemoveExisting(attachment.id)}
                 disabled={disabled}
-                aria-label={`Remover ${anexo.nome}`}
+                aria-label={`Remover ${attachment.nome}`}
               >
                 <CloseRoundedIcon fontSize="small" />
               </IconButton>
@@ -202,7 +205,7 @@ function AttachmentsField({
 
       {files.length > 0 && (
         <span className="text-xs text-content-subtle">
-          {formatBytes(totalBytes)} de {formatBytes(ANEXOS_MAX_BYTES)} em arquivos novos
+          {formatBytes(totalBytes)} de {formatBytes(ATTACHMENTS_MAX_BYTES)} em arquivos novos
         </span>
       )}
     </div>

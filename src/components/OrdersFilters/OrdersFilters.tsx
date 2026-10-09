@@ -41,7 +41,7 @@ function OrdersFilters() {
   }
 
   /** A listagem está buscando? Mostra o spinner dentro do campo. */
-  const isFetching = useIsFetching({ queryKey: ['atendimentos'] }) > 0
+  const isFetching = useIsFetching({ queryKey: ['orders'] }) > 0
 
   useEffect(() => {
     const timer = setTimeout(() => applySearch(search), SEARCH_DEBOUNCE_MS)
@@ -54,7 +54,7 @@ function OrdersFilters() {
     // Mesmo texto de antes não muda a query, então nada seria buscado. Aqui
     // Enter força a ida ao backend para trazer dados atualizados.
     if (search.trim() === appliedSearch) {
-      void queryClient.invalidateQueries({ queryKey: ['atendimentos'] })
+      void queryClient.invalidateQueries({ queryKey: ['orders'] })
       return
     }
 

@@ -23,7 +23,7 @@ const DEFAULT_REDIRECT = '/'
  */
 function Login() {
   const [email, setEmail] = useState('')
-  const [senha, setSenha] = useState('')
+  const [password, setPassword] = useState('')
 
   const signIn = useSetAtom(signInAtom)
   const navigate = useNavigate()
@@ -43,7 +43,7 @@ function Login() {
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
-    mutation.mutate({ email: email.trim(), senha })
+    mutation.mutate({ email: email.trim(), senha: password })
   }
 
   const errorMessage =
@@ -79,8 +79,8 @@ function Login() {
           <TextField
             label="Senha"
             type="password"
-            value={senha}
-            onChange={(event) => setSenha(event.target.value)}
+            value={password}
+            onChange={(event) => setPassword(event.target.value)}
             autoComplete="current-password"
             required
             fullWidth
