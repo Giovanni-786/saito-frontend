@@ -55,7 +55,8 @@ function readErrorBody(data: unknown): ApiErrorBody {
   return (data ?? {}) as ApiErrorBody
 }
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? '/api'
+// `||` e não `??`: no build Docker a variável chega como string vazia quando não é informada.
+const BASE_URL = import.meta.env.VITE_API_URL || '/api'
 const TIMEOUT_MS = 30_000
 
 export const http: AxiosInstance = axios.create({
