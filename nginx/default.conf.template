@@ -1,0 +1,31 @@
+server {
+    listen 80;
+    server_name _;
+    root /usr/share/nginx/html;
+    index index.html;
+
+    client_max_body_size 50m;
+
+    # O backend não publica CORS, então em produção o front fala com ele
+    # pelo mesmo domínio: /api/* -> ${API_UPSTREAM}/* (mesmo papel do proxy do Vite em dev).
+    location /api/ {
+        proxy_pass ${API_UPSTREAM}/;
+        proxy_set_header Host $proxy_host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+
+    # Arquivos com hash gerados pelo Vite podem ficar em cache indefinidamente.
+    location /assets/ {
+        expires 1y;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # Fallback do SPA (BrowserRouter): qualquer rota desconhecida cai no index.html.
+    location / {
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache";
+    }
+}
