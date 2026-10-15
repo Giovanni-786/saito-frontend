@@ -34,25 +34,72 @@ export class ApiError extends Error {
   }
 }
 
-/** Formato de erro que o backend devolve. Ajuste conforme o contrato real. */
+/**
+ * Formato de erro do backend (ErroResponseDTO). `erro` é só o reason phrase do
+ * HTTP ("Unauthorized"), então não serve como mensagem para o usuário.
+ */
 type ApiErrorBody = {
+  mensagem?: string
+  campos?: unknown
+}
+
+type ErrorBody = {
   message?: string
-  error?: string
-  code?: string
-  errors?: unknown
+  details?: unknown
 }
 
 /**
- * Nem todo endpoint responde JSON: o /auth/login devolve o motivo da falha em
- * text/plain ("Email ou senha inválidos"). Sem isto a UI mostraria o genérico
- * "A requisição falhou com status 401" e perderia a mensagem real do backend.
+ * Lê o motivo da falha. O backend responde JSON com `mensagem`; proxies na frente
+ * dele (ex.: o limite de requisições que devolve 429) podem responder texto puro
+ * ou uma página HTML, que não deve ir parar na tela.
  */
-function readErrorBody(data: unknown): ApiErrorBody {
+function readErrorBody(data: unknown): ErrorBody {
   if (typeof data === 'string') {
     const text = data.trim()
-    return text ? { message: text } : {}
+    return text && !text.startsWith('<') && text.length <= 200 ? { message: text } : {}
   }
-  return (data ?? {}) as ApiErrorBody
+  if (!data || typeof data !== 'object') return {}
+
+  const { mensagem, campos } = data as ApiErrorBody
+  return {
+    message: typeof mensagem === 'string' && mensagem ? mensagem : undefined,
+    details: campos,
+  }
+}
+
+/** "Retry-After: 120" -> "em 2 minutos". Só o formato em segundos; datas HTTP são ignoradas. */
+function retryAfterHint(value: unknown) {
+  const seconds = Number(value)
+  if (!Number.isFinite(seconds) || seconds <= 0) return ''
+  if (seconds < 60) return ` em ${Math.ceil(seconds)} segundos`
+  const minutes = Math.ceil(seconds / 60)
+  return ` em ${minutes} ${minutes === 1 ? 'minuto' : 'minutos'}`
+}
+
+/** Mensagem para quando a resposta não diz o motivo: explica pelo status. */
+function statusMessage(status: number, retryAfter: unknown) {
+  switch (status) {
+    case 400:
+      return 'Os dados enviados são inválidos. Revise e tente novamente.'
+    case 401:
+      return 'Sua sessão expirou ou as credenciais são inválidas. Entre novamente.'
+    case 403:
+      return 'Você não tem permissão para fazer isso.'
+    case 404:
+      return 'O recurso solicitado não foi encontrado.'
+    case 408:
+      return 'O servidor demorou demais para responder. Tente novamente.'
+    case 413:
+      return 'O arquivo enviado é grande demais.'
+    case 429:
+      return `Muitas tentativas em pouco tempo. Aguarde e tente novamente${retryAfterHint(retryAfter) || ' em alguns instantes'}.`
+    case 502:
+    case 503:
+    case 504:
+      return 'O servidor está indisponível no momento. Tente novamente em alguns instantes.'
+  }
+  if (status >= 500) return 'Erro interno no servidor. Tente novamente em alguns instantes.'
+  return `A requisição falhou (erro ${status}).`
 }
 
 // `||` e não `??`: no build Docker a variável chega como string vazia quando não é informada.
@@ -134,9 +181,9 @@ function toApiError(error: unknown): ApiError {
   }
 
   const body = readErrorBody(response.data)
-  const message = body.message ?? body.error ?? `A requisição falhou com status ${response.status}.`
+  const message = body.message ?? statusMessage(response.status, response.headers['retry-after'])
 
-  return new ApiError(message, response.status, body.code ?? `HTTP_${response.status}`, body.errors)
+  return new ApiError(message, response.status, `HTTP_${response.status}`, body.details)
 }
 
 http.interceptors.response.use(

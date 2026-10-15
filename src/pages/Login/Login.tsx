@@ -15,6 +15,27 @@ import Brand from '../../components/Brand/Brand'
 /** Para onde mandar o usuário depois do login quando não veio de outra página. */
 const DEFAULT_REDIRECT = '/'
 
+const SERVER_ERROR_MESSAGE = 'Não foi possível entrar agora. Tente novamente em instantes.'
+
+/**
+ * Mensagem da falha de login. O 429 vem do limite de 10 falhas por minuto; os
+ * demais status ganham um texto próprio da tela em vez do genérico da API.
+ */
+function loginErrorMessage(error: Error) {
+  if (!(error instanceof ApiError)) return SERVER_ERROR_MESSAGE
+  if (error.isNetworkError) return 'Falha de conexão. Verifique sua internet.'
+
+  switch (error.status) {
+    case 400:
+      return 'Preencha o e-mail e a senha corretamente.'
+    case 401:
+      return 'E-mail ou senha incorretos.'
+    case 429:
+      return 'Muitas tentativas de login. Aguarde cerca de 1 minuto e tente novamente.'
+  }
+  return error.status >= 500 ? SERVER_ERROR_MESSAGE : error.message
+}
+
 /**
  * Tela de login. Card centralizado com e-mail, senha e o botão de entrar.
  *
@@ -46,12 +67,7 @@ function Login() {
     mutation.mutate({ email: email.trim(), senha: password })
   }
 
-  const errorMessage =
-    mutation.error instanceof ApiError
-      ? mutation.error.message
-      : mutation.error
-        ? 'Não foi possível entrar. Tente novamente.'
-        : null
+  const errorMessage = mutation.error ? loginErrorMessage(mutation.error) : null
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-canvas px-4 py-12">
