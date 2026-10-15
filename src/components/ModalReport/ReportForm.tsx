@@ -11,7 +11,7 @@ import BuildOutlinedIcon from '@mui/icons-material/BuildOutlined'
 import CalendarMonthOutlinedIcon from '@mui/icons-material/CalendarMonthOutlined'
 import { maskCpf, normalizeChassis, normalizePlate, onlyDigits } from '../../utils/masks'
 import Section from '../FormSection/FormSection'
-import { initialValues, validate } from './reportValues'
+import { DIAGNOSIS_MAX_LENGTH, initialValues, validate } from './reportValues'
 import type { ReportFormValues } from './reportValues'
 import { generateReportPdf } from './generateReportPdf'
 import ReportPreview from './ReportPreview'
@@ -196,11 +196,15 @@ function ReportForm({ onClose }: ReportFormProps) {
                 value={values.diagnosis}
                 onChange={(event) => setField('diagnosis', event.target.value)}
                 error={!!errors.diagnosis}
-                helperText={errors.diagnosis}
+                helperText={
+                  errors.diagnosis ??
+                  `${values.diagnosis.length}/${DIAGNOSIS_MAX_LENGTH} caracteres`
+                }
                 placeholder="Avaria nos bicos injetores, feito pedido das peças..."
                 required
                 multiline
                 minRows={4}
+                slotProps={{ htmlInput: { maxLength: DIAGNOSIS_MAX_LENGTH } }}
                 disabled={disabled}
                 className="sm:col-span-6"
               />

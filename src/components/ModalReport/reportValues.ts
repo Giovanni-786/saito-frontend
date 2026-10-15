@@ -29,6 +29,26 @@ export type ReportFormErrors = Partial<Record<keyof ReportFormValues, string>>
 /** De 3 a 7 letras ou números, em qualquer ordem: aceita placa parcial ou completa. */
 const PLATE_PATTERN = /^[A-Z0-9]{3,7}$/
 
+/**
+ * O laudo precisa caber em uma página. Medido no PDF com todos os outros campos
+ * preenchidos: o quadro do diagnóstico comporta 11 linhas de ~80 caracteres
+ * (texto todo em maiúsculas, o pior caso). As margens abaixo deixam folga.
+ */
+export const DIAGNOSIS_MAX_LENGTH = 800
+const DIAGNOSIS_MAX_LINES = 11
+const DIAGNOSIS_CHARS_PER_LINE = 75
+
+/** Linhas que o diagnóstico ocupa no PDF: cada quebra de linha começa outra. */
+function diagnosisLines(diagnosis: string) {
+  return diagnosis
+    .trim()
+    .split('\n')
+    .reduce(
+      (total, line) => total + Math.max(1, Math.ceil(line.length / DIAGNOSIS_CHARS_PER_LINE)),
+      0,
+    )
+}
+
 export function initialValues(): ReportFormValues {
   return {
     customerName: '',
@@ -69,6 +89,9 @@ export function validate(values: ReportFormValues): ReportFormErrors {
 
   if (!values.arrivalDate) errors.arrivalDate = 'Informe a data da chegada.'
   if (!values.diagnosis.trim()) errors.diagnosis = 'Descreva o diagnóstico.'
+  else if (diagnosisLines(values.diagnosis) > DIAGNOSIS_MAX_LINES)
+    errors.diagnosis =
+      'O diagnóstico não cabe em uma página. Reduza o texto ou as quebras de linha.'
 
   // Datas em AAAA-MM-DD comparam certo como texto.
   if (values.partsArrivalDate && values.partsArrivalDate < values.arrivalDate)
