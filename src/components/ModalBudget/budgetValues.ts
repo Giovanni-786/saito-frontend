@@ -49,8 +49,8 @@ export const FUEL_OPTIONS = [
   'Elétrico',
 ] as const
 
-/** Placa antiga (ABC1234) ou Mercosul (ABC1D23). */
-const PLATE_PATTERN = /^[A-Z]{3}\d[A-Z0-9]\d{2}$/
+/** De 3 a 7 letras ou números, em qualquer ordem: aceita placa parcial ou completa. */
+const PLATE_PATTERN = /^[A-Z0-9]{3,7}$/
 
 export function emptyItem(): BudgetItem {
   return { id: crypto.randomUUID(), quantity: '1', description: '', unitPrice: '' }
@@ -105,7 +105,7 @@ export function validate(values: BudgetFormValues): BudgetFormErrors {
 
   if (!values.vehicle.trim()) errors.vehicle = 'Informe o veículo.'
   if (values.plate && !PLATE_PATTERN.test(values.plate))
-    errors.plate = 'Placa inválida. Ex.: ABC1234.'
+    errors.plate = 'Informe ao menos 3 letras ou números.'
   if (values.year && values.year.length !== 4 && values.year.length !== 8)
     errors.year = 'Use 2018 ou 2017/2018.'
 

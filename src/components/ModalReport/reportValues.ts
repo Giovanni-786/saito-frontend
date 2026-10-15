@@ -26,8 +26,8 @@ export type ReportFormValues = {
 
 export type ReportFormErrors = Partial<Record<keyof ReportFormValues, string>>
 
-/** Placa antiga (ABC1234) ou Mercosul (ABC1D23). */
-const PLATE_PATTERN = /^[A-Z]{3}\d[A-Z0-9]\d{2}$/
+/** De 3 a 7 letras ou números, em qualquer ordem: aceita placa parcial ou completa. */
+const PLATE_PATTERN = /^[A-Z0-9]{3,7}$/
 
 export function initialValues(): ReportFormValues {
   return {
@@ -62,7 +62,7 @@ export function validate(values: ReportFormValues): ReportFormErrors {
   if (!values.vehicleModel.trim()) errors.vehicleModel = 'Informe o modelo do veículo.'
 
   if (!values.plate) errors.plate = 'Informe a placa.'
-  else if (!PLATE_PATTERN.test(values.plate)) errors.plate = 'Placa inválida. Ex.: ABC1234.'
+  else if (!PLATE_PATTERN.test(values.plate)) errors.plate = 'Informe ao menos 3 letras ou números.'
 
   if (values.chassis && values.chassis.length !== 17) errors.chassis = 'O chassi tem 17 caracteres.'
   if (values.renavam && values.renavam.length !== 11) errors.renavam = 'O Renavam tem 11 dígitos.'

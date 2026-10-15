@@ -19,8 +19,8 @@ export type NewOrderFormValues = {
 
 export type NewOrderFormErrors = Partial<Record<keyof NewOrderFormValues, string>>
 
-/** Placa antiga (ABC1234) ou Mercosul (ABC1D23). */
-const PLATE_PATTERN = /^[A-Z]{3}\d[A-Z0-9]\d{2}$/
+/** De 3 a 7 letras ou números, em qualquer ordem: aceita placa parcial ou completa. */
+const PLATE_PATTERN = /^[A-Z0-9]{3,7}$/
 
 export function initialValues(): NewOrderFormValues {
   return {
@@ -61,7 +61,7 @@ export function validate(values: NewOrderFormValues): NewOrderFormErrors {
   if (!values.vehicle.trim()) errors.vehicle = 'Informe o veículo.'
 
   if (!values.plate) errors.plate = 'Informe a placa.'
-  else if (!PLATE_PATTERN.test(values.plate)) errors.plate = 'Placa inválida. Ex.: ABC1234.'
+  else if (!PLATE_PATTERN.test(values.plate)) errors.plate = 'Informe ao menos 3 letras ou números.'
 
   if (!values.phone) errors.phone = 'Informe o telefone.'
   else if (values.phone.length < 10) errors.phone = 'Telefone incompleto.'
