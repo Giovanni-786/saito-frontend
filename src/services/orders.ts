@@ -121,13 +121,3 @@ export function serviceDownloadAttachment(id: number, attachmentId: number) {
 export function serviceDeleteAttachment(id: number, attachmentId: number) {
   return api.delete(`/atendimentos/${id}/anexos/${attachmentId}`)
 }
-
-/** Resposta de GET /atendimentos/faturamento: soma do valor de todos os atendimentos. */
-export type Revenue = {
-  total: number
-}
-
-/** Faturamento total dos atendimentos. Falhas chegam como ApiError. */
-export function serviceRevenue(signal?: AbortSignal) {
-  return api.get<Revenue>('/atendimentos/faturamento', { signal })
-}
