@@ -8,6 +8,15 @@ import PdfHeader from '../Pdf/PdfHeader'
 import { COLORS, pdfStyles } from '../Pdf/pdfStyles'
 import type { ReportFormValues } from './reportValues'
 
+/**
+ * O react-pdf só quebra linha entre palavras: uma sequência longa sem espaço
+ * ("AAAA...", um código colado) atravessaria a página. Palavras longas viram
+ * letras soltas, que podem quebrar em qualquer ponto; as curtas ficam inteiras.
+ */
+function breakLongWords(word: string) {
+  return word.length > 20 ? Array.from(word) : [word]
+}
+
 /** Estilos só do laudo; os comuns aos PDFs vêm de `pdfStyles`. */
 const styles = StyleSheet.create({
   diagnosisBox: {
@@ -83,7 +92,7 @@ function ReportPdf({ values, issuedAt }: ReportPdfProps) {
               />
             </View>
             <View style={styles.diagnosisBox}>
-              <Text>{values.diagnosis.trim()}</Text>
+              <Text hyphenationCallback={breakLongWords}>{values.diagnosis.trim()}</Text>
             </View>
           </View>
 

@@ -55,7 +55,7 @@ function ReportPreview({ values }: ReportPreviewProps) {
           placeholder="dd/mm/aaaa"
         />
         <p
-          className={`rounded border-l-[3px] border-saito-blue bg-light-blue p-3 whitespace-pre-wrap ${values.diagnosis.trim() ? '' : 'text-content-subtle italic'}`}
+          className={`rounded border-l-[3px] border-saito-blue bg-light-blue p-3 wrap-break-word whitespace-pre-wrap ${values.diagnosis.trim() ? '' : 'text-content-subtle italic'}`}
         >
           {values.diagnosis.trim() || 'O diagnóstico aparece aqui.'}
         </p>
