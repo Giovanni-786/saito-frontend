@@ -83,6 +83,25 @@ http.interceptors.request.use((config) => {
   return config
 })
 
+type UnauthorizedHandler = (rejectedToken: string) => void
+
+let unauthorizedHandler: UnauthorizedHandler | null = null
+
+/**
+ * Registra quem reage a um 401 numa requisição autenticada (token expirado ou
+ * inválido). Recebe o token recusado para não derrubar uma sessão nova caso a
+ * resposta chegue depois de um novo login.
+ */
+export function onUnauthorized(handler: UnauthorizedHandler | null) {
+  unauthorizedHandler = handler
+}
+
+/** Token que a requisição levou, ou null se ela saiu sem Authorization (ex.: /auth/login). */
+function sentToken(config: AxiosRequestConfig | undefined) {
+  const header = config?.headers?.Authorization
+  return typeof header === 'string' && header.startsWith('Bearer ') ? header.slice(7) : null
+}
+
 /* ------------------------------------------------------------------ */
 /* Normalização de erros                                               */
 /* ------------------------------------------------------------------ */
@@ -122,7 +141,14 @@ function toApiError(error: unknown): ApiError {
 
 http.interceptors.response.use(
   (response) => response,
-  (error: unknown) => Promise.reject(toApiError(error)),
+  (error: unknown) => {
+    // Só 401: o backend devolve 403 para "sem permissão", que não deve encerrar a sessão.
+    if (axios.isAxiosError(error) && error.response?.status === 401) {
+      const token = sentToken(error.config)
+      if (token) unauthorizedHandler?.(token)
+    }
+    return Promise.reject(toApiError(error))
+  },
 )
 
 /* ------------------------------------------------------------------ */
