@@ -71,7 +71,7 @@ function Login() {
 
   return (
     <div className="flex min-h-dvh flex-col items-center justify-center gap-8 bg-canvas px-4 py-12">
-      <Brand withSubtitle />
+      <Brand className="w-56 h-auto" />
       <main className="w-full max-w-sm rounded-2xl border border-line bg-surface p-6 shadow-[0_1px_2px_rgba(20,23,26,0.04)] sm:p-8">
         <div className="mb-6">
           <h1 className="text-xl font-semibold tracking-tight">Entrar</h1>

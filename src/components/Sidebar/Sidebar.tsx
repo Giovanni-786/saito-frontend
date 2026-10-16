@@ -67,7 +67,7 @@ function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const content = (
     <div className="flex h-full flex-col gap-6 bg-surface px-4 py-5">
       <div className="px-2">
-        <Brand withSubtitle />
+        <Brand className="w-full h-auto" />
       </div>
 
       <nav aria-label="Menu principal" className="flex flex-col gap-1">

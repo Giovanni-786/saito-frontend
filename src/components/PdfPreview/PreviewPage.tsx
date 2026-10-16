@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import logo from '../../assets/logo-saito-recortada.jpeg'
 import { WORKSHOP } from '../../constants/workshop'
 import { formatDate } from '../../utils/formatDate'
 import { today } from '../../utils/today'
@@ -20,7 +21,11 @@ function PreviewPage({ showPhone = false, children }: PreviewPageProps) {
       className="flex min-h-160 flex-col overflow-hidden rounded-md border border-line bg-white text-[11.5px] leading-normal text-content shadow-[0_12px_32px_rgba(15,42,84,0.10),0_2px_6px_rgba(15,42,84,0.06)]"
     >
       <div className="flex items-start justify-between gap-4 bg-deep-blue px-7 py-5 text-white">
-        <div className="flex min-w-0 flex-col gap-0.5">
+        {/* Logo num selo branco: o JPEG tem fundo branco e não fica sobre o azul. */}
+        <div className="flex shrink-0 items-center rounded-md bg-white p-1.5">
+          <img src={logo} alt="" className="h-14 w-auto" />
+        </div>
+        <div className="mr-auto flex min-w-0 flex-col gap-0.5">
           <span className="text-lg font-bold tracking-wide">
             {WORKSHOP.tradeName.toUpperCase()}
           </span>

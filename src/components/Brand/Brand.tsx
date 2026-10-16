@@ -1,23 +1,16 @@
-import BuildRoundedIcon from '@mui/icons-material/BuildRounded'
+import logo from '../../assets/logo-saito-recortada.jpeg'
 
 type BrandProps = {
-  /** Mostra "Mecânica Saito" abaixo do nome. */
-  withSubtitle?: boolean
+  /** Classes de tamanho da logo (largura/altura). */
+  className?: string
 }
 
-/** Marca do sistema: selo azul-escuro com a chave e o nome ao lado. */
-function Brand({ withSubtitle = false }: BrandProps) {
-  return (
-    <div className="flex items-center gap-3">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-[10px] bg-deep-blue text-white">
-        <BuildRoundedIcon sx={{ fontSize: 18 }} aria-hidden="true" />
-      </div>
-      <div className="flex flex-col leading-tight">
-        <span className="text-[15px] font-bold tracking-tight text-deep-blue">Saito Oficina</span>
-        {withSubtitle && <span className="text-xs text-content-muted">Mecânica Saito</span>}
-      </div>
-    </div>
-  )
+/**
+ * Marca do sistema: logo da Oficina Saito. O JPEG tem fundo branco, e o
+ * `mix-blend-multiply` o funde com fundos claros (ex.: o bg-canvas do login).
+ */
+function Brand({ className = 'h-9 w-auto' }: BrandProps) {
+  return <img src={logo} alt="Oficina Saito" className={`mix-blend-multiply ${className}`} />
 }
 
 export default Brand

@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from '@react-pdf/renderer'
+import { Image, StyleSheet, Text, View } from '@react-pdf/renderer'
+import logo from '../../assets/logo-saito-recortada.jpeg'
 import { WORKSHOP } from '../../constants/workshop'
 import { formatDate } from '../../utils/formatDate'
 import { COLORS, PAGE_PADDING } from './pdfStyles'
@@ -14,6 +15,10 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'flex-start',
   },
+  // Selo branco: o JPEG da logo tem fundo branco e não fica sobre o azul.
+  logoBox: { backgroundColor: COLORS.white, borderRadius: 4, padding: 4, marginRight: 16 },
+  logo: { height: 56, width: 106 },
+  workshop: { flexGrow: 1 },
   tradeName: { fontFamily: 'Helvetica-Bold', fontSize: 22, letterSpacing: 0.5 },
   companyName: { fontSize: 9, marginTop: 4, opacity: 0.85 },
   headerLine: { fontSize: 8.5, marginTop: 2, opacity: 0.75 },
@@ -35,7 +40,10 @@ function PdfHeader({ issuedAt, showPhone = false }: PdfHeaderProps) {
   return (
     <>
       <View style={styles.header}>
-        <View>
+        <View style={styles.logoBox}>
+          <Image src={logo} style={styles.logo} />
+        </View>
+        <View style={styles.workshop}>
           <Text style={styles.tradeName}>{WORKSHOP.tradeName.toUpperCase()}</Text>
           <Text style={styles.companyName}>{WORKSHOP.companyName}</Text>
           <Text style={styles.headerLine}>
