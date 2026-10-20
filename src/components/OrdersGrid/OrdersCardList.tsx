@@ -6,9 +6,9 @@ import ChevronRightRoundedIcon from '@mui/icons-material/ChevronRightRounded'
 import type { Order } from '../../services/orders'
 import { openEditOrderModalAtom } from '../../store'
 import { formatDate } from '../../utils/formatDate'
-import { currencyFormatter } from './columns'
 import DeleteOrderButton from './DeleteOrderButton'
 import OrdersEmptyState from './OrdersEmptyState'
+import { latestServiceDate } from './orderSummary'
 import PlateChip from './PlateChip'
 
 type OrdersCardListProps = {
@@ -46,36 +46,33 @@ function OrdersCardList({ rows, loading, page, totalPages, onPageChange }: Order
   return (
     <>
       <ul className="divide-y divide-line">
-        {rows.map((row) => (
-          <li key={row.id} className="relative">
-            {/* O card inteiro abre a edição; a lixeira fica fora do botão, por cima. */}
-            <button
-              type="button"
-              onClick={() => openEdit(row.id)}
-              className="flex w-full flex-col gap-2 px-4 py-4 pr-14 text-left transition-colors hover:bg-[#f7f9fd]"
-            >
-              <div className="flex items-baseline justify-between gap-3">
+        {rows.map((row) => {
+          const date = latestServiceDate(row)
+          return (
+            <li key={row.id} className="relative">
+              {/* O card inteiro abre a edição; a lixeira fica fora do botão, por cima. */}
+              <button
+                type="button"
+                onClick={() => openEdit(row.id)}
+                className="flex w-full flex-col gap-2 px-4 py-4 pr-14 text-left transition-colors hover:bg-[#f7f9fd]"
+              >
                 <span className="truncate font-semibold">{row.cliente}</span>
-                <span className="shrink-0 font-semibold tabular-nums">
-                  {currencyFormatter.format(row.valor)}
-                </span>
+                <div className="flex flex-wrap items-center gap-2 text-sm">
+                  <PlateChip plate={row.placa} />
+                  <span className="truncate text-content-muted">{row.veiculo}</span>
+                </div>
+                {date && (
+                  <span className="text-xs text-content-muted tabular-nums">
+                    {formatDate(date)}
+                  </span>
+                )}
+              </button>
+              <div className="absolute top-3 right-2">
+                <DeleteOrderButton order={row} />
               </div>
-              <div className="flex flex-wrap items-center gap-2 text-sm">
-                <PlateChip plate={row.placa} />
-                <span className="truncate text-content-muted">{row.veiculo}</span>
-              </div>
-              {row.servicosPecas && (
-                <p className="line-clamp-2 text-sm text-[#3d4652]">{row.servicosPecas}</p>
-              )}
-              <span className="text-xs text-content-muted tabular-nums">
-                {formatDate(row.data)} · {row.km.toLocaleString('pt-BR')} km
-              </span>
-            </button>
-            <div className="absolute top-3 right-2">
-              <DeleteOrderButton order={row} />
-            </div>
-          </li>
-        ))}
+            </li>
+          )
+        })}
       </ul>
 
       {totalPages > 1 && (

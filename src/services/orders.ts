@@ -1,18 +1,26 @@
 import { api } from '../utils/api'
 
+/** Serviço realizado num atendimento. Um atendimento tem um ou mais. */
+export type Service = {
+  descricao: string
+  valor: number
+  /** Data no formato ISO (AAAA-MM-DD), como o LocalDate do backend serializa. */
+  data: string
+  /** Quilometragem do veículo quando o serviço foi feito. */
+  km: number
+}
+
 /** Item de GET /atendimentos. Os nomes vêm do AtendimentoResponseDTO do backend. */
 export type Order = {
   id: number
-  /** Data no formato ISO (AAAA-MM-DD), como o LocalDate do backend serializa. */
-  data: string
   cliente: string
   veiculo: string
   placa: string
   telefone: string
-  km: number
-  valor: number
-  servicosPecas: string | null
   observacao: string | null
+  servicos: Service[]
+  /** Soma dos valores dos serviços, calculada pelo backend. Só na resposta. */
+  valorTotal: number
 }
 
 /** Query string aceita por GET /atendimentos. `page` começa em 0. */
@@ -33,8 +41,11 @@ export type Page<T> = {
   size: number
 }
 
-/** Corpo de POST /atendimentos: o atendimento sem o `id`, que o backend gera. */
-export type NewOrder = Omit<Order, 'id'>
+/**
+ * Corpo de POST e PUT /atendimentos: o atendimento sem o `id`, que o backend gera.
+ * No PUT, `servicos` substitui a lista atual inteira (o que faltar é excluído).
+ */
+export type NewOrder = Omit<Order, 'id' | 'valorTotal'>
 
 /** Lista os atendimentos com busca e paginação. Falhas chegam como ApiError. */
 export function serviceList(params: ListOrdersParams, signal?: AbortSignal) {

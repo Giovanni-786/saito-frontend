@@ -4,19 +4,18 @@ import { formatDate } from '../../utils/formatDate'
 import { maskPhone, onlyDigits } from '../../utils/masks'
 import DeleteOrderButton from './DeleteOrderButton'
 import EditOrderButton from './EditOrderButton'
+import { latestServiceDate } from './orderSummary'
 import PlateChip from './PlateChip'
-
-export const currencyFormatter = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
-})
 
 export const columns: GridColDef<Order>[] = [
   {
+    // A data vem dos serviços do atendimento: o backend não ordena por ela.
     field: 'data',
     headerName: 'Data',
     width: 112,
-    valueFormatter: (value: string) => formatDate(value),
+    sortable: false,
+    valueGetter: (_value, row) => latestServiceDate(row),
+    valueFormatter: (value: string | null) => (value ? formatDate(value) : ''),
     cellClassName: 'cell-muted',
   },
   {
@@ -40,34 +39,6 @@ export const columns: GridColDef<Order>[] = [
     headerName: 'Placa',
     width: 116,
     renderCell: ({ value }) => <PlateChip plate={value} />,
-  },
-  {
-    field: 'km',
-    headerName: 'KM',
-    type: 'number',
-    width: 100,
-    valueFormatter: (value: number) => value.toLocaleString('pt-BR'),
-    cellClassName: 'cell-muted',
-  },
-  {
-    field: 'servicosPecas',
-    headerName: 'Serviços / peças',
-    flex: 1.7,
-    minWidth: 200,
-    sortable: false,
-    renderCell: ({ value }) => (
-      <span className="truncate" title={value ?? undefined}>
-        {value}
-      </span>
-    ),
-  },
-  {
-    field: 'valor',
-    headerName: 'Valor',
-    type: 'number',
-    width: 124,
-    valueFormatter: (value: number) => currencyFormatter.format(value),
-    cellClassName: 'cell-strong',
   },
   {
     field: 'actions',

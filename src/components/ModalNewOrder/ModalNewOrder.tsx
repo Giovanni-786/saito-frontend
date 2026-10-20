@@ -5,6 +5,7 @@ import CloseRoundedIcon from '@mui/icons-material/CloseRounded'
 import { closeOrderModalAtom, orderModalAtom } from '../../store'
 import EditOrderForm from './EditOrderForm'
 import NewOrderForm from './NewOrderForm'
+import { orderFormSourceAtom } from './orderFormAtoms'
 
 /** Largura do painel no desktop. No mobile ele ocupa a tela inteira. */
 const DRAWER_WIDTH = 560
@@ -22,6 +23,10 @@ function ModalNewOrder() {
   const close = useSetAtom(closeOrderModalAtom)
 
   const isEdit = orderId !== null
+
+  // O atom pode ainda ter o atendimento aberto antes; só vale se for este.
+  const source = useAtomValue(orderFormSourceAtom)
+  const customerName = source?.order.id === orderId ? source.order.cliente : null
 
   return (
     <Drawer
@@ -44,12 +49,12 @@ function ModalNewOrder() {
         <div className="flex items-start justify-between gap-4 border-b border-line px-5 pt-5 pb-4 sm:px-6 sm:pt-6 sm:pb-5">
           <div className="flex flex-col gap-1">
             <h2 id="modal-new-order-title" className="text-xl font-semibold tracking-tight">
-              {isEdit ? 'Editar atendimento' : 'Novo atendimento'}
+              {isEdit ? 'Editar cliente' : 'Novo atendimento'}
             </h2>
             <p className="text-sm text-content-muted">
               {isEdit
-                ? `Atendimento #${orderId}. Altere os campos e salve.`
-                : 'Preencha os dados do serviço realizado.'}
+                ? (customerName ?? `Atendimento #${orderId}`)
+                : 'Preencha os dados do cliente, do veículo e dos serviços.'}
             </p>
           </div>
           <IconButton onClick={close} aria-label="Fechar" sx={{ color: 'text.secondary', mr: -1 }}>
