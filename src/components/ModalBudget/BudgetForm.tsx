@@ -13,6 +13,7 @@ import DeleteOutlineRoundedIcon from '@mui/icons-material/DeleteOutlineRounded'
 import DirectionsCarOutlinedIcon from '@mui/icons-material/DirectionsCarOutlined'
 import FileDownloadOutlinedIcon from '@mui/icons-material/FileDownloadOutlined'
 import Inventory2OutlinedIcon from '@mui/icons-material/Inventory2Outlined'
+import NotesOutlinedIcon from '@mui/icons-material/NotesOutlined'
 import PaymentsOutlinedIcon from '@mui/icons-material/PaymentsOutlined'
 import {
   maskCurrency,
@@ -24,6 +25,7 @@ import {
 import Section from '../FormSection/FormSection'
 import {
   FUEL_OPTIONS,
+  OBSERVATION_MAX_LENGTH,
   budgetTotalCents,
   emptyItem,
   initialValues,
@@ -377,6 +379,27 @@ function BudgetForm({ onClose }: BudgetFormProps) {
                   </span>
                 </div>
               </div>
+            </Section>
+
+            <Section
+              title="Observações"
+              description="Informações extras para o cliente, se precisar."
+              icon={<NotesOutlinedIcon fontSize="small" />}
+            >
+              <TextField
+                label="Observação"
+                value={values.observation}
+                onChange={(event) =>
+                  setField('observation', event.target.value.slice(0, OBSERVATION_MAX_LENGTH))
+                }
+                helperText={`${values.observation.length}/${OBSERVATION_MAX_LENGTH} caracteres`}
+                placeholder="Garantia de 90 dias para as peças trocadas..."
+                multiline
+                minRows={3}
+                slotProps={{ htmlInput: { maxLength: OBSERVATION_MAX_LENGTH } }}
+                disabled={disabled}
+                className="sm:col-span-6"
+              />
             </Section>
 
             {errors.general && (

@@ -9,7 +9,7 @@ const styles = StyleSheet.create({
   header: {
     backgroundColor: COLORS.deepBlue,
     color: COLORS.white,
-    paddingVertical: 26,
+    paddingVertical: 18,
     paddingHorizontal: PAGE_PADDING,
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -17,14 +17,14 @@ const styles = StyleSheet.create({
   },
   // Selo branco: o JPEG da logo tem fundo branco e não fica sobre o azul.
   logoBox: { backgroundColor: COLORS.white, borderRadius: 4, padding: 4, marginRight: 16 },
-  logo: { height: 56, width: 106 },
+  logo: { height: 44, width: 83 },
   workshop: { flexGrow: 1 },
-  tradeName: { fontFamily: 'Helvetica-Bold', fontSize: 22, letterSpacing: 0.5 },
-  companyName: { fontSize: 9, marginTop: 4, opacity: 0.85 },
-  headerLine: { fontSize: 8.5, marginTop: 2, opacity: 0.75 },
+  tradeName: { fontFamily: 'Helvetica-Bold', fontSize: 18, letterSpacing: 0.5 },
+  companyName: { fontSize: 8.5, marginTop: 3, opacity: 0.85 },
+  headerLine: { fontSize: 8, marginTop: 2, opacity: 0.75 },
   documentTag: { alignItems: 'flex-end' },
-  phone: { fontFamily: 'Helvetica-Bold', fontSize: 11, marginBottom: 4 },
-  documentDate: { fontSize: 8.5, opacity: 0.75 },
+  phone: { fontFamily: 'Helvetica-Bold', fontSize: 10, marginBottom: 4 },
+  documentDate: { fontSize: 8, opacity: 0.75 },
   accentBar: { height: 4, backgroundColor: COLORS.saitoBlue },
 })
 

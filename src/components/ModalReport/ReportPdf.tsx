@@ -2,20 +2,12 @@ import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import { WORKSHOP } from '../../constants/workshop'
 import { formatDate } from '../../utils/formatDate'
 import { maskCpf } from '../../utils/masks'
+import { breakLongWords } from '../Pdf/breakLongWords'
 import PdfField from '../Pdf/PdfField'
 import PdfFooter from '../Pdf/PdfFooter'
 import PdfHeader from '../Pdf/PdfHeader'
 import { COLORS, pdfStyles } from '../Pdf/pdfStyles'
 import type { ReportFormValues } from './reportValues'
-
-/**
- * O react-pdf só quebra linha entre palavras: uma sequência longa sem espaço
- * ("AAAA...", um código colado) atravessaria a página. Palavras longas viram
- * letras soltas, que podem quebrar em qualquer ponto; as curtas ficam inteiras.
- */
-function breakLongWords(word: string) {
-  return word.length > 20 ? Array.from(word) : [word]
-}
 
 /** Estilos só do laudo; os comuns aos PDFs vêm de `pdfStyles`. */
 const styles = StyleSheet.create({

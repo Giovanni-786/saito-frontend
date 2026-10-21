@@ -1,6 +1,7 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import { WORKSHOP } from '../../constants/workshop'
 import { maskCurrency, maskPhone, maskVehicleYear } from '../../utils/masks'
+import { breakLongWords } from '../Pdf/breakLongWords'
 import PdfField from '../Pdf/PdfField'
 import PdfFooter from '../Pdf/PdfFooter'
 import PdfHeader from '../Pdf/PdfHeader'
@@ -50,14 +51,22 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     marginTop: 6,
-    paddingVertical: 9,
+    paddingVertical: 7,
     paddingHorizontal: 10,
     backgroundColor: COLORS.deepBlue,
     color: COLORS.white,
     borderRadius: 4,
   },
-  grandTotalLabel: { fontFamily: 'Helvetica-Bold', fontSize: 10, letterSpacing: 1.5 },
-  grandTotalValue: { fontFamily: 'Helvetica-Bold', fontSize: 15 },
+  grandTotalLabel: { fontFamily: 'Helvetica-Bold', fontSize: 9, letterSpacing: 1.5 },
+  grandTotalValue: { fontFamily: 'Helvetica-Bold', fontSize: 13 },
+
+  observationBox: {
+    backgroundColor: COLORS.lightBlue,
+    borderLeftWidth: 3,
+    borderLeftColor: COLORS.saitoBlue,
+    borderRadius: 4,
+    padding: 12,
+  },
 })
 
 type BudgetPdfProps = {
@@ -139,6 +148,15 @@ function BudgetPdf({ values, issuedAt }: BudgetPdfProps) {
                     </Text>
                   </View>
                 ))}
+              </View>
+            </View>
+          )}
+
+          {values.observation.trim() && (
+            <View style={pdfStyles.section}>
+              <Text style={pdfStyles.sectionTitle}>OBSERVAÇÕES</Text>
+              <View style={styles.observationBox}>
+                <Text hyphenationCallback={breakLongWords}>{values.observation.trim()}</Text>
               </View>
             </View>
           )}

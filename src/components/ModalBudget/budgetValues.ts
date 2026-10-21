@@ -26,7 +26,16 @@ export type BudgetFormValues = {
   items: BudgetItem[]
   /** Mão de obra em centavos. */
   labor: string
+  /** Observação livre do cliente ou da oficina; opcional. */
+  observation: string
 }
+
+/**
+ * Limite da observação. Diferente do diagnóstico do laudo, o orçamento já
+ * quebra em mais de uma página quando a tabela de itens cresce, então aqui
+ * não precisa caber numa página só — só evita um texto desproporcional.
+ */
+export const OBSERVATION_MAX_LENGTH = 500
 
 type ItemErrors = Partial<Record<'quantity' | 'description' | 'unitPrice', string>>
 
@@ -67,6 +76,7 @@ export function initialValues(): BudgetFormValues {
     fuel: '',
     items: [emptyItem()],
     labor: '',
+    observation: '',
   }
 }
 

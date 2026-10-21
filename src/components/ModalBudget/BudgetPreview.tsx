@@ -84,6 +84,14 @@ function BudgetPreview({ values }: BudgetPreviewProps) {
         </div>
       </PreviewSection>
 
+      {values.observation.trim() && (
+        <PreviewSection title="OBSERVAÇÕES">
+          <p className="rounded border-l-[3px] border-saito-blue bg-light-blue p-3 wrap-break-word whitespace-pre-wrap">
+            {values.observation.trim()}
+          </p>
+        </PreviewSection>
+      )}
+
       <div className="ml-auto flex w-[45%] min-w-52 flex-col whitespace-nowrap">
         {items.length > 0 && (
           <div className="flex justify-between border-b border-line-strong px-2.5 py-1.5">
@@ -97,9 +105,9 @@ function BudgetPreview({ values }: BudgetPreviewProps) {
             <span className="tabular-nums">{maskCurrency(values.labor)}</span>
           </div>
         )}
-        <div className="mt-1.5 flex items-center justify-between gap-3 rounded bg-deep-blue px-2.5 py-2 text-white">
-          <span className="text-[11px] font-bold tracking-[0.15em]">TOTAL</span>
-          <span className="text-[16px] font-bold tabular-nums">
+        <div className="mt-1.5 flex items-center justify-between gap-3 rounded bg-deep-blue px-2.5 py-1.5 text-white">
+          <span className="text-[10px] font-bold tracking-[0.15em]">TOTAL</span>
+          <span className="text-[14px] font-bold tabular-nums">
             {maskCurrency(String(productsTotal + labor)) || 'R$ 0,00'}
           </span>
         </div>

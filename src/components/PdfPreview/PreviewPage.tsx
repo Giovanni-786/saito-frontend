@@ -20,26 +20,26 @@ function PreviewPage({ showPhone = false, children }: PreviewPageProps) {
       aria-hidden="true"
       className="flex min-h-160 flex-col overflow-hidden rounded-md border border-line bg-white text-[11.5px] leading-normal text-content shadow-[0_12px_32px_rgba(15,42,84,0.10),0_2px_6px_rgba(15,42,84,0.06)]"
     >
-      <div className="flex items-start justify-between gap-4 bg-deep-blue px-7 py-5 text-white">
+      <div className="flex items-start justify-between gap-4 bg-deep-blue px-7 py-3.5 text-white">
         {/* Logo num selo branco: o JPEG tem fundo branco e não fica sobre o azul. */}
         <div className="flex shrink-0 items-center rounded-md bg-white p-1.5">
-          <img src={logo} alt="" className="h-14 w-auto" />
+          <img src={logo} alt="" className="h-11 w-auto" />
         </div>
         <div className="mr-auto flex min-w-0 flex-col gap-0.5">
-          <span className="text-lg font-bold tracking-wide">
+          <span className="text-[15px] font-bold tracking-wide">
             {WORKSHOP.tradeName.toUpperCase()}
           </span>
-          <span className="text-[10px] opacity-85">{WORKSHOP.companyName}</span>
-          <span className="text-[9.5px] opacity-75">
+          <span className="text-[9.5px] opacity-85">{WORKSHOP.companyName}</span>
+          <span className="text-[9px] opacity-75">
             CNPJ {WORKSHOP.cnpj} · IE {WORKSHOP.stateRegistration}
           </span>
-          <span className="text-[9.5px] opacity-75">
+          <span className="text-[9px] opacity-75">
             {WORKSHOP.street} · {WORKSHOP.district} · {WORKSHOP.city}
           </span>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          {showPhone && <span className="text-[12px] font-bold">Fone {WORKSHOP.phone}</span>}
-          <span className="text-[9.5px] opacity-75">Emitido em {formatDate(today())}</span>
+          {showPhone && <span className="text-[11px] font-bold">Fone {WORKSHOP.phone}</span>}
+          <span className="text-[9px] opacity-75">Emitido em {formatDate(today())}</span>
         </div>
       </div>
       <div className="h-1 bg-saito-blue" />
