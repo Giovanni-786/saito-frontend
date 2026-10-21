@@ -1,6 +1,6 @@
 import { atom } from 'jotai'
 import { splitAtom } from 'jotai/utils'
-import type { Attachment, NewOrder, Order } from '../../services/orders'
+import type { Order } from '../../services/orders'
 import {
   detailsFromOrder,
   emptyService,
@@ -25,10 +25,8 @@ import type { OrderFormTab, ServiceFormValues } from './newOrderValues'
  * Cada abertura da modal começa com `initOrderFormAtom`.
  */
 
-export type OrderFormSource = { order: Order; attachments: Attachment[] }
-
-/** Atendimento que está sendo editado e seus anexos salvos. null = cadastro. */
-export const orderFormSourceAtom = atom<OrderFormSource | null>(null)
+/** Atendimento que está sendo editado, como veio da API. null = cadastro. */
+export const orderFormSourceAtom = atom<Order | null>(null)
 
 /**
  * Quem preencheu os atoms por último. Cada montagem do form tem o seu token e
@@ -45,11 +43,16 @@ export const servicesValuesAtom = atom<ServiceFormValues[]>([])
 /** Um atom por serviço: cada card lê e escreve só o seu. */
 export const serviceAtomsAtom = splitAtom(servicesValuesAtom, (service) => service.key)
 
-/** Arquivos novos, ainda só no navegador. */
-export const newFilesAtom = atom<File[]>([])
-
-/** Anexos salvos que o usuário não removeu. */
-export const keptAttachmentsAtom = atom<Attachment[]>([])
+/**
+ * Bytes dos arquivos novos de todos os serviços. Vão todos numa requisição só,
+ * então o limite do backend vale para a soma, e não para cada serviço.
+ */
+export const newFilesTotalBytesAtom = atom((get) =>
+  get(servicesValuesAtom).reduce(
+    (sum, service) => sum + service.files.reduce((s, file) => s + file.size, 0),
+    0,
+  ),
+)
 
 /** Erros só aparecem depois da primeira tentativa de salvar, não enquanto digita. */
 export const orderFormSubmittedAtom = atom(false)
@@ -82,17 +85,15 @@ const TAB_ORDER: OrderFormTab[] = ['details', 'services']
 /** Prepara o formulário: vazio para cadastro ou preenchido com o atendimento a editar. */
 export const initOrderFormAtom = atom(
   null,
-  (_get, set, { session, source }: { session: object; source: OrderFormSource | null }) => {
+  (_get, set, { session, source }: { session: object; source: Order | null }) => {
     set(orderFormSessionAtom, session)
     set(orderFormSourceAtom, source)
     set(orderFormTabAtom, 'details')
     set(orderFormSubmittedAtom, false)
-    set(newFilesAtom, [])
-    set(keptAttachmentsAtom, source?.attachments ?? [])
 
     if (source) {
-      set(detailsValuesAtom, detailsFromOrder(source.order))
-      set(servicesValuesAtom, servicesFromOrder(source.order))
+      set(detailsValuesAtom, detailsFromOrder(source))
+      set(servicesValuesAtom, servicesFromOrder(source))
     } else {
       set(detailsValuesAtom, initialDetails())
       set(servicesValuesAtom, [emptyService()])
@@ -104,16 +105,8 @@ export const addServiceAtom = atom(null, (_get, set) => {
   set(servicesValuesAtom, (current) => [...current, emptyService()])
 })
 
-export const removeKeptAttachmentAtom = atom(null, (_get, set, attachmentId: number) => {
-  set(keptAttachmentsAtom, (current) => current.filter((a) => a.id !== attachmentId))
-})
-
 /** O que a mutation precisa para salvar. */
-export type OrderFormSubmission = {
-  body: NewOrder
-  files: File[]
-  keptAttachments: Attachment[]
-}
+export type OrderFormSubmission = ReturnType<typeof toPayload>
 
 /**
  * Tentativa de salvar: liga a exibição dos erros e, se houver algum, leva o
@@ -129,9 +122,5 @@ export const submitOrderFormAtom = atom(null, (get, set): OrderFormSubmission | 
     return null
   }
 
-  return {
-    body: toPayload(get(detailsValuesAtom), get(servicesValuesAtom)),
-    files: get(newFilesAtom),
-    keptAttachments: get(keptAttachmentsAtom),
-  }
+  return toPayload(get(detailsValuesAtom), get(servicesValuesAtom), get(orderFormSourceAtom))
 })

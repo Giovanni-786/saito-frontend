@@ -15,7 +15,7 @@ export const columns: GridColDef<Order>[] = [
     width: 112,
     sortable: false,
     valueGetter: (_value, row) => latestServiceDate(row),
-    valueFormatter: (value: string | null) => (value ? formatDate(value) : ''),
+    valueFormatter: (value: string | null) => (value ? formatDate(value) : '—'),
     cellClassName: 'cell-muted',
   },
   {
@@ -26,14 +26,22 @@ export const columns: GridColDef<Order>[] = [
     // O telefone vai embaixo do nome: libera uma coluna e agrupa o contato.
     renderCell: ({ row }) => (
       <div className="flex min-w-0 flex-col justify-center gap-0.5 leading-tight">
-        <span className="truncate font-semibold">{row.cliente}</span>
-        <span className="text-[12.5px] text-content-muted tabular-nums">
-          {maskPhone(onlyDigits(row.telefone))}
-        </span>
+        <span className="truncate font-semibold">{row.cliente ?? '—'}</span>
+        {row.telefone && (
+          <span className="text-[12.5px] text-content-muted tabular-nums">
+            {maskPhone(onlyDigits(row.telefone))}
+          </span>
+        )}
       </div>
     ),
   },
-  { field: 'veiculo', headerName: 'Veículo', flex: 1.2, minWidth: 160 },
+  {
+    field: 'veiculo',
+    headerName: 'Veículo',
+    flex: 1.2,
+    minWidth: 160,
+    valueFormatter: (value: string | null) => value ?? '—',
+  },
   {
     field: 'placa',
     headerName: 'Placa',

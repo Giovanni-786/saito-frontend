@@ -13,7 +13,7 @@ import { ATTACHMENTS_MAX_BYTES } from '../../services/orders'
 import type { Attachment } from '../../services/orders'
 
 type AttachmentsFieldProps = {
-  /** Anexos já salvos no atendimento (só na edição). */
+  /** Anexos já salvos (só na edição). */
   existing: Attachment[]
   /** Arquivos escolhidos agora, ainda não enviados. */
   files: File[]
@@ -21,6 +21,11 @@ type AttachmentsFieldProps = {
   onRemoveExisting: (attachmentId: number) => void
   /** Baixa um anexo salvo; a promessa marca o carregamento do botão. */
   onDownloadExisting: (attachment: Attachment) => Promise<void>
+  /**
+   * Bytes de arquivos novos em outros campos que vão na mesma requisição. O
+   * limite do backend vale para a requisição inteira, não para cada campo.
+   */
+  usedBytesElsewhere?: number
   disabled?: boolean
 }
 
@@ -43,10 +48,11 @@ function FileIcon({ type }: { type: string }) {
 const fileKey = (file: File) => `${file.name}:${file.size}:${file.lastModified}`
 
 /**
- * Campo de anexos do atendimento: vários arquivos do computador ou, no celular,
+ * Campo de anexos: vários arquivos do computador ou, no celular,
  * da galeria/câmera (o seletor nativo oferece as opções). Também aceita arrastar.
  *
- * O limite de 100MB vale para os arquivos novos, que vão todos numa requisição.
+ * O limite de 100MB vale para os arquivos novos, que vão todos numa requisição
+ * (somados aos de `usedBytesElsewhere`).
  */
 function AttachmentsField({
   existing,
@@ -54,6 +60,7 @@ function AttachmentsField({
   onFilesChange,
   onRemoveExisting,
   onDownloadExisting,
+  usedBytesElsewhere = 0,
   disabled,
 }: AttachmentsFieldProps) {
   const inputId = useId()
@@ -62,7 +69,8 @@ function AttachmentsField({
   /** Ids dos anexos sendo baixados agora. */
   const [downloading, setDownloading] = useState<number[]>([])
 
-  const totalBytes = files.reduce((sum, file) => sum + file.size, 0)
+  /** Bytes novos da requisição inteira, não só deste campo. */
+  const totalBytes = usedBytesElsewhere + files.reduce((sum, file) => sum + file.size, 0)
 
   function addFiles(selected: File[]) {
     const known = new Set(files.map(fileKey))

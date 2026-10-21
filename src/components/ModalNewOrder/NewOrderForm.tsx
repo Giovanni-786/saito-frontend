@@ -8,7 +8,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
 import { serviceCreate, serviceDeleteAttachment, serviceUpdate } from '../../services/orders'
-import type { Attachment, Order } from '../../services/orders'
+import type { Order } from '../../services/orders'
 import DetailsTab from './DetailsTab'
 import type { OrderFormTab } from './newOrderValues'
 import {
@@ -24,8 +24,6 @@ import ServicesTab from './ServicesTab'
 type NewOrderFormProps = {
   /** Atendimento a editar. Sem ele, o formulário cadastra um novo. */
   order?: Order
-  /** Anexos já salvos do atendimento em edição. */
-  attachments?: Attachment[]
   /** Chamado ao cancelar e depois de salvar com sucesso. */
   onClose: () => void
 }
@@ -58,10 +56,7 @@ function TabLabel({ tab, label }: { tab: OrderFormTab; label: string }) {
  * Os valores vivem nos atoms da feature (orderFormAtoms), preenchidos ao montar.
  * Este componente só cuida das abas e de salvar; cada aba lê e escreve o seu pedaço.
  */
-/** Default estável: um `[]` novo a cada render dispararia o init de novo. */
-const NO_ATTACHMENTS: Attachment[] = []
-
-function NewOrderForm({ order, attachments = NO_ATTACHMENTS, onClose }: NewOrderFormProps) {
+function NewOrderForm({ order, onClose }: NewOrderFormProps) {
   const isEdit = order !== undefined
 
   const initForm = useSetAtom(initOrderFormAtom)
@@ -72,23 +67,23 @@ function NewOrderForm({ order, attachments = NO_ATTACHMENTS, onClose }: NewOrder
   const [session] = useState(() => ({}))
   const ready = useAtomValue(orderFormSessionAtom) === session
   useEffect(() => {
-    initForm({ session, source: order ? { order, attachments } : null })
-  }, [initForm, session, order, attachments])
+    initForm({ session, source: order ?? null })
+  }, [initForm, session, order])
 
   const queryClient = useQueryClient()
 
   const mutation = useMutation({
-    mutationFn: async ({ body, files, keptAttachments }: OrderFormSubmission) => {
-      if (!order) return serviceCreate(body, files)
+    mutationFn: async ({ body, removedAttachments }: OrderFormSubmission) => {
+      if (!order) return serviceCreate(body)
 
-      // Sem nenhum anexo salvo restante, a parte `arquivos` vai como null e o backend
-      // limpa tudo de uma vez. Se sobrou algum, remove só os excluídos, um a um.
-      const clearAll = keptAttachments.length === 0
-      const saved = await serviceUpdate(order.id, body, files, clearAll)
-      if (!clearAll) {
-        const removed = attachments.filter((a) => !keptAttachments.some((m) => m.id === a.id))
-        await Promise.all(removed.map((a) => serviceDeleteAttachment(order.id, a.id)))
-      }
+      // Serviço que perdeu todos os anexos já vai com `apagarAnexos` no PUT; os que
+      // perderam só alguns têm os removidos excluídos um a um, depois de salvar.
+      const saved = await serviceUpdate(order.id, body)
+      await Promise.all(
+        removedAttachments.map(({ serviceId, attachmentId }) =>
+          serviceDeleteAttachment(serviceId, attachmentId),
+        ),
+      )
       return saved
     },
     onSuccess: () => {

@@ -66,7 +66,8 @@ function DeleteOrderDialog() {
         <DialogContentText id="delete-order-description" sx={{ mt: 1 }}>
           {order && (
             <>
-              O atendimento de <strong>{order.cliente}</strong> ({order.placa}) será excluído.{' '}
+              O atendimento de <strong>{order.cliente ?? 'cliente sem nome'}</strong>
+              {order.placa && ` (${order.placa})`} será excluído.{' '}
             </>
           )}
           Tem certeza? Essa ação não pode ser desfeita.

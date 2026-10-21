@@ -26,7 +26,7 @@ function ModalNewOrder() {
 
   // O atom pode ainda ter o atendimento aberto antes; só vale se for este.
   const source = useAtomValue(orderFormSourceAtom)
-  const customerName = source?.order.id === orderId ? source.order.cliente : null
+  const customerName = source?.id === orderId ? source.cliente : null
 
   return (
     <Drawer

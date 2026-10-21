@@ -56,10 +56,10 @@ function OrdersCardList({ rows, loading, page, totalPages, onPageChange }: Order
                 onClick={() => openEdit(row.id)}
                 className="flex w-full flex-col gap-2 px-4 py-4 pr-14 text-left transition-colors hover:bg-[#f7f9fd]"
               >
-                <span className="truncate font-semibold">{row.cliente}</span>
+                <span className="truncate font-semibold">{row.cliente ?? '—'}</span>
                 <div className="flex flex-wrap items-center gap-2 text-sm">
                   <PlateChip plate={row.placa} />
-                  <span className="truncate text-content-muted">{row.veiculo}</span>
+                  <span className="truncate text-content-muted">{row.veiculo ?? '—'}</span>
                 </div>
                 {date && (
                   <span className="text-xs text-content-muted tabular-nums">

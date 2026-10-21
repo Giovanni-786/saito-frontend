@@ -2,7 +2,7 @@ import { useQuery } from '@tanstack/react-query'
 import Alert from '@mui/material/Alert'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
-import { serviceGet, serviceListAttachments } from '../../services/orders'
+import { serviceGet } from '../../services/orders'
 import NewOrderForm from './NewOrderForm'
 
 type EditOrderFormProps = {
@@ -11,8 +11,9 @@ type EditOrderFormProps = {
 }
 
 /**
- * Carrega o atendimento (GET /atendimentos/{id}) e seus anexos e só então monta
- * o formulário, que usa os dados como valor inicial dos campos.
+ * Carrega o atendimento (GET /atendimentos/{id}, que já traz os serviços e os
+ * anexos de cada um) e só então monta o formulário, que usa os dados como valor
+ * inicial dos campos.
  */
 function EditOrderForm({ orderId, onClose }: EditOrderFormProps) {
   const query = useQuery({
@@ -23,13 +24,7 @@ function EditOrderForm({ orderId, onClose }: EditOrderFormProps) {
     gcTime: 0,
   })
 
-  const attachmentsQuery = useQuery({
-    queryKey: ['orders', 'detail', orderId, 'attachments'],
-    queryFn: ({ signal }) => serviceListAttachments(orderId, signal),
-    gcTime: 0,
-  })
-
-  if (query.isPending || attachmentsQuery.isPending) {
+  if (query.isPending) {
     return (
       <div
         className="flex flex-1 items-center justify-center"
@@ -41,21 +36,14 @@ function EditOrderForm({ orderId, onClose }: EditOrderFormProps) {
     )
   }
 
-  if (query.isError || attachmentsQuery.isError) {
+  if (query.isError) {
     return (
       <div className="p-5 sm:p-6">
         <Alert
           severity="error"
           role="alert"
           action={
-            <Button
-              color="inherit"
-              size="small"
-              onClick={() => {
-                if (query.isError) void query.refetch()
-                if (attachmentsQuery.isError) void attachmentsQuery.refetch()
-              }}
-            >
+            <Button color="inherit" size="small" onClick={() => void query.refetch()}>
               Tentar novamente
             </Button>
           }
@@ -66,7 +54,7 @@ function EditOrderForm({ orderId, onClose }: EditOrderFormProps) {
     )
   }
 
-  return <NewOrderForm order={query.data} attachments={attachmentsQuery.data} onClose={onClose} />
+  return <NewOrderForm order={query.data} onClose={onClose} />
 }
 
 export default EditOrderForm

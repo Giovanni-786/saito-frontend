@@ -1,12 +1,17 @@
 import { useAtom, useAtomValue } from 'jotai'
 import type { PrimitiveAtom } from 'jotai'
+import { toast } from 'sonner'
 import IconButton from '@mui/material/IconButton'
 import TextField from '@mui/material/TextField'
 import DeleteRoundedIcon from '@mui/icons-material/DeleteRounded'
+import { serviceDownloadAttachment } from '../../services/orders'
+import type { Attachment } from '../../services/orders'
+import { saveBlob } from '../../utils/download'
 import { maskCurrency, maskInteger, onlyDigits } from '../../utils/masks'
+import AttachmentsField from './AttachmentsField'
 import { validateService } from './newOrderValues'
-import type { ServiceFormValues } from './newOrderValues'
-import { orderFormSubmittedAtom } from './orderFormAtoms'
+import type { ServiceFormValues, ServiceTextField } from './newOrderValues'
+import { newFilesTotalBytesAtom, orderFormSubmittedAtom } from './orderFormAtoms'
 
 type ServiceCardProps = {
   /** Atom deste serviço, vindo do `serviceAtomsAtom`. */
@@ -18,14 +23,26 @@ type ServiceCardProps = {
   disabled: boolean
 }
 
-/** Um serviço do atendimento: data, quilometragem, valor e descrição. */
+/** Um serviço do atendimento: data, quilometragem, valor, descrição e anexos. */
 function ServiceCard({ serviceAtom, number, onRemove, disabled }: ServiceCardProps) {
   const [values, setValues] = useAtom(serviceAtom)
   const submitted = useAtomValue(orderFormSubmittedAtom)
   const errors = submitted ? validateService(values) : {}
+  const newFilesTotalBytes = useAtomValue(newFilesTotalBytesAtom)
+  const ownBytes = values.files.reduce((sum, file) => sum + file.size, 0)
 
-  function setField(field: keyof Omit<ServiceFormValues, 'key'>, value: string) {
+  function setField(field: ServiceTextField, value: string) {
     setValues((current) => ({ ...current, [field]: value }))
+  }
+
+  async function downloadAttachment(attachment: Attachment) {
+    // Só anexos salvos aparecem para baixar, e eles só existem em serviço salvo.
+    if (values.id === null) return
+    try {
+      saveBlob(await serviceDownloadAttachment(values.id, attachment.id), attachment.nome)
+    } catch {
+      toast.error(`Não foi possível baixar ${attachment.nome}, tente novamente.`)
+    }
   }
 
   const title = `Serviço #${number}`
@@ -104,6 +121,21 @@ function ServiceCard({ serviceAtom, number, onRemove, disabled }: ServiceCardPro
           className="col-span-2 sm:col-span-3"
         />
       </div>
+
+      <AttachmentsField
+        existing={values.attachments}
+        files={values.files}
+        onFilesChange={(files) => setValues((current) => ({ ...current, files }))}
+        onRemoveExisting={(attachmentId) =>
+          setValues((current) => ({
+            ...current,
+            attachments: current.attachments.filter((a) => a.id !== attachmentId),
+          }))
+        }
+        onDownloadExisting={downloadAttachment}
+        usedBytesElsewhere={newFilesTotalBytes - ownBytes}
+        disabled={disabled}
+      />
     </li>
   )
 }
