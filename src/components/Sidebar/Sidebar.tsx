@@ -1,11 +1,14 @@
 import type { ReactNode } from 'react'
 import { useAtomValue, useSetAtom } from 'jotai'
+import { useMutation } from '@tanstack/react-query'
 import { NavLink } from 'react-router'
+import { toast } from 'sonner'
 import Drawer from '@mui/material/Drawer'
 import IconButton from '@mui/material/IconButton'
 import Tooltip from '@mui/material/Tooltip'
 import AssignmentOutlinedIcon from '@mui/icons-material/AssignmentOutlined'
 import DescriptionOutlinedIcon from '@mui/icons-material/DescriptionOutlined'
+import InsertDriveFileOutlinedIcon from '@mui/icons-material/InsertDriveFileOutlined'
 import LogoutIcon from '@mui/icons-material/Logout'
 import RequestQuoteOutlinedIcon from '@mui/icons-material/RequestQuoteOutlined'
 import {
@@ -14,6 +17,7 @@ import {
   openSignOutDialogAtom,
   userEmailAtom,
 } from '../../store'
+import { generateBlankSheetPdf } from '../BlankSheet/generateBlankSheetPdf'
 import Brand from '../Brand/Brand'
 
 export const SIDEBAR_WIDTH = 248
@@ -33,12 +37,21 @@ type NavButtonProps = {
   icon: ReactNode
   label: string
   onClick: () => void
+  disabled?: boolean
 }
 
-/** Item que abre uma modal (Orçamento, Laudo): visual de link, comportamento de botão. */
-function NavButton({ icon, label, onClick }: NavButtonProps) {
+/**
+ * Item que abre uma modal (Orçamento, Laudo) ou baixa um PDF (Folha em branco):
+ * visual de link, comportamento de botão.
+ */
+function NavButton({ icon, label, onClick, disabled = false }: NavButtonProps) {
   return (
-    <button type="button" onClick={onClick} className={`${navItemClass} ${navIdleClass}`}>
+    <button
+      type="button"
+      onClick={onClick}
+      disabled={disabled}
+      className={`${navItemClass} ${navIdleClass} disabled:cursor-wait disabled:opacity-60`}
+    >
       {icon}
       {label}
     </button>
@@ -51,12 +64,23 @@ function NavButton({ icon, label, onClick }: NavButtonProps) {
  *
  * "Orçamento", "Laudo seguradora" e "Sair" só abrem as modais globais via atoms;
  * quem faz o trabalho são o ModalBudget, o ModalReport e o SignOutDialog.
+ * "Folha em branco" não tem o que preencher: baixa o PDF direto.
  */
 function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
   const openBudget = useSetAtom(openBudgetModalAtom)
   const openReport = useSetAtom(openReportModalAtom)
   const openSignOut = useSetAtom(openSignOutDialogAtom)
   const email = useAtomValue(userEmailAtom)
+
+  const blankSheet = useMutation({
+    mutationFn: generateBlankSheetPdf,
+    onSuccess: () => toast.success('PDF da folha em branco gerado com sucesso.'),
+    // O toast não diz o motivo: o erro vai para o console, para dar para investigar.
+    onError: (error) => {
+      console.error('Falha ao gerar a folha em branco:', error)
+      toast.error('Erro inesperado ao gerar o PDF, tente novamente.')
+    },
+  })
 
   /** No mobile a gaveta fecha antes de abrir a modal, para não ficar por trás dela. */
   function select(action: () => void) {
@@ -94,6 +118,12 @@ function Sidebar({ mobileOpen, onMobileClose }: SidebarProps) {
           icon={<DescriptionOutlinedIcon sx={{ fontSize: 20 }} aria-hidden="true" />}
           label="Laudo seguradora"
           onClick={() => select(openReport)}
+        />
+        <NavButton
+          icon={<InsertDriveFileOutlinedIcon sx={{ fontSize: 20 }} aria-hidden="true" />}
+          label="Folha em branco"
+          onClick={() => select(() => blankSheet.mutate())}
+          disabled={blankSheet.isPending}
         />
       </nav>
 

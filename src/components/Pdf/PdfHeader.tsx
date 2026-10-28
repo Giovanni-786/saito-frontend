@@ -29,8 +29,8 @@ const styles = StyleSheet.create({
 })
 
 type PdfHeaderProps = {
-  /** Data de emissão em AAAA-MM-DD. */
-  issuedAt: string
+  /** Data de emissão em AAAA-MM-DD. Sem ela, o cabeçalho sai sem data, como na folha em branco. */
+  issuedAt?: string
   /** Mostra o telefone da oficina em destaque, como no talão de orçamento. */
   showPhone?: boolean
 }
@@ -56,7 +56,7 @@ function PdfHeader({ issuedAt, showPhone = false }: PdfHeaderProps) {
 
         <View style={styles.documentTag}>
           {showPhone && <Text style={styles.phone}>Fone {WORKSHOP.phone}</Text>}
-          <Text style={styles.documentDate}>Emitido em {formatDate(issuedAt)}</Text>
+          {issuedAt && <Text style={styles.documentDate}>Emitido em {formatDate(issuedAt)}</Text>}
         </View>
       </View>
       <View style={styles.accentBar} />
