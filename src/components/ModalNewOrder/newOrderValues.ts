@@ -85,24 +85,28 @@ export function detailsFromOrder(order: Order): DetailsFormValues {
 }
 
 /**
- * Do mais antigo para o mais recente: a posição vira o número do serviço (#1, #2...).
- * Sem data ou km, o serviço vai para o começo. Campos null abrem vazios, como em
- * `detailsFromOrder`.
+ * Serviços do mais antigo para o mais recente: a posição vira o número do
+ * serviço (#1, #2...). Sem data ou km, o serviço vai para o começo.
  */
+export function chronologicalServices(order: Order) {
+  return [...order.servicos].sort(
+    (a, b) => (a.data ?? '').localeCompare(b.data ?? '') || (a.km ?? 0) - (b.km ?? 0),
+  )
+}
+
+/** Na ordem de `chronologicalServices`. Campos null abrem vazios, como em `detailsFromOrder`. */
 export function servicesFromOrder(order: Order): ServiceFormValues[] {
-  return [...order.servicos]
-    .sort((a, b) => (a.data ?? '').localeCompare(b.data ?? '') || (a.km ?? 0) - (b.km ?? 0))
-    .map((service) => ({
-      key: newServiceKey(),
-      id: service.id,
-      date: service.data ?? '',
-      mileage: service.km === null ? '' : String(service.km),
-      // Math.round: 350.1 * 100 dá 35009.99... em ponto flutuante.
-      amount: service.valor === null ? '' : String(Math.round(service.valor * 100)),
-      description: service.descricao,
-      attachments: service.anexos ?? [],
-      files: [],
-    }))
+  return chronologicalServices(order).map((service) => ({
+    key: newServiceKey(),
+    id: service.id,
+    date: service.data ?? '',
+    mileage: service.km === null ? '' : String(service.km),
+    // Math.round: 350.1 * 100 dá 35009.99... em ponto flutuante.
+    amount: service.valor === null ? '' : String(Math.round(service.valor * 100)),
+    description: service.descricao,
+    attachments: service.anexos ?? [],
+    files: [],
+  }))
 }
 
 /* ------------------------------------------------------------------ */

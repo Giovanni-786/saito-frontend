@@ -7,9 +7,11 @@ import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Tab from '@mui/material/Tab'
 import Tabs from '@mui/material/Tabs'
+import PictureAsPdfOutlinedIcon from '@mui/icons-material/PictureAsPdfOutlined'
 import { serviceCreate, serviceDeleteAttachment, serviceUpdate } from '../../services/orders'
 import type { Order } from '../../services/orders'
 import DetailsTab from './DetailsTab'
+import { generateOrderServicesPdf } from './generateOrderServicesPdf'
 import type { OrderFormTab } from './newOrderValues'
 import {
   initOrderFormAtom,
@@ -104,6 +106,17 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
     },
   })
 
+  // Exporta o atendimento como está salvo, não o que ainda está sendo editado.
+  const exportMutation = useMutation({
+    mutationFn: generateOrderServicesPdf,
+    onSuccess: () => toast.success('PDF dos serviços gerado com sucesso.'),
+    // O toast não diz o motivo: o erro vai para o console, para dar para investigar.
+    onError: (error) => {
+      console.error('Falha ao gerar o PDF dos serviços:', error)
+      toast.error('Erro inesperado ao gerar o PDF, tente novamente.')
+    },
+  })
+
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     // Inválido: o atom já levou o usuário para a primeira aba com erro.
@@ -147,6 +160,21 @@ function NewOrderForm({ order, onClose }: NewOrderFormProps) {
       </div>
 
       <div className="flex flex-col-reverse gap-3 border-t border-line bg-surface-subtle px-5 py-4 sm:flex-row sm:justify-end sm:px-6">
+        {order && (
+          <Button
+            variant="text"
+            size="large"
+            onClick={() => exportMutation.mutate(order)}
+            disabled={disabled}
+            loading={exportMutation.isPending}
+            loadingPosition="start"
+            startIcon={<PictureAsPdfOutlinedIcon />}
+            sx={{ mr: { sm: 'auto' } }}
+          >
+            Exportar serviços
+          </Button>
+        )}
+
         <Button variant="outlined" size="large" onClick={onClose} disabled={disabled}>
           Cancelar
         </Button>
